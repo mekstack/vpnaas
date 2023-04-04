@@ -1,0 +1,11 @@
+[package]
+name = "wg-server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.70"
+base64 = "0.21.0"
+failure = "0.1.8"
+log = "0.4.17"
+wireguard-uapi = "3.0.0-rc1"
