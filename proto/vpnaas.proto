@@ -1,0 +1,63 @@
+syntax = "proto3";
+package vpnaas;
+
+service Keys {
+    // For wg_server
+    rpc get_all_peers(AllPeersRequest) returns (AllPeers);
+
+    // For configgen
+    rpc get_user_address(User) returns (Address);
+
+    // For frontend
+    rpc set_pubkey_user(UserPubkey) returns (UserPubkeyStatus);
+}
+
+service Wg {
+    rpc push_new_peer(Peer) returns (PeerPushStatus);
+}
+
+service ConfigGen {
+    rpc get_config(User) returns (UserConfig);
+}
+
+//
+// Messages
+//
+
+message User {
+    string username = 1;
+}
+
+message Peer {
+    bytes pubkey = 1;
+    uint32 allowed_ip = 2;
+}
+
+message Address {
+    uint32 address = 1;
+}
+
+message UserPubkey {
+    User user = 1;
+    bytes pubkey = 2;
+}
+
+message AllPeersRequest {}
+message AllPeers {
+    repeated Peer peers = 1;
+}
+
+message UserConfig {
+    message ServerPeer {
+        bytes pubkey = 1;
+        string endpoint = 2;
+        repeated string allowed_ips = 3;
+    }
+
+    uint32 user_address = 1; // get_user_address
+    ServerPeer server_peer = 2; // hardcoded
+    string dns = 3; // hardcoded
+}
+
+message UserPubkeyStatus { bool added = 1; }
+message PeerPushStatus   { bool added = 1; }
