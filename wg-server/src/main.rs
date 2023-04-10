@@ -2,50 +2,63 @@ use anyhow;
 use base64::{engine::general_purpose, Engine as _};
 use std::env;
 
+use wireguard_uapi::get::{AllowedIp, Device, Peer as DevicePeer};
 use wireguard_uapi::set;
-use wireguard_uapi::get::{AllowedIp, Device, Peer};
 use wireguard_uapi::DeviceInterface;
 
-// TODO(mmskv): openstackesque logging
-//use log::{info, warn};
+use tonic::{transport::Server, Request, Response, Status};
 
-fn main() -> anyhow::Result<()> {
-    let device_name = match env::var("WG_INTERFACE") {
-        Ok(result) => result,
-        Err(_) => {
-            println!("WG_INTERFACE not set. Using default 'wg0'");
-            "wg0".to_string()
-        }
-    };
+use vpnaas::wg_server::{Wg, WgServer};
+use vpnaas::{Peer, PeerPushStatus};
 
-    let mut wg = wireguard_uapi::WgSocket::connect()?;
-    // let mut device = wg
-    //     .get_device(DeviceInterface::from_name(device_name))
-    //     .unwrap();
-    let mut device = set::Device::from_ifname(device_name);
+pub mod vpnaas {
+    tonic::include_proto!("vpnaas");
+}
 
-    let private_key: [u8; 32] = general_purpose::STANDARD_NO_PAD
-        .decode("sFS4WEV2m+bAe2O+qOxMYmz78VB+aQGECxAMXNeW92w")
-        .unwrap()
-        .try_into()
-        .unwrap();
+#[derive(Debug, Default)]
+pub struct MyWg {}
 
-    let public_key: [u8; 32] = general_purpose::STANDARD_NO_PAD
-        .decode("baTHPpnl0BBtC5f0kcn3maRCD2dHpyv1eK1GLVXp1i0")
-        .unwrap()
-        .try_into()
-        .unwrap();
+#[tonic::async_trait]
+impl Wg for MyWg {
+    async fn push_new_peer(
+        &self,
+        request: Request<Peer>,
+    ) -> Result<Response<PeerPushStatus>, Status> {
+        let mut device = set::Device::from_ifname("wg0".to_string());
 
-    let peer = wireguard_uapi::linux::set::Peer::from_public_key(&public_key);
+        let private_key: [u8; 32] = general_purpose::STANDARD_NO_PAD
+            .decode("sFS4WEV2m+bAe2O+qOxMYmz78VB+aQGECxAMXNeW92w")
+            .unwrap()
+            .try_into()
+            .unwrap();
+        device.private_key = Some(&private_key);
 
-    device.private_key = Some(&private_key);
-    device.peers.push(peer);
+        let public_key: [u8; 32] = request.into_inner().pubkey.try_into().unwrap();
+        let peer = wireguard_uapi::linux::set::Peer::from_public_key(&public_key);
+        device.peers.push(peer);
 
-    wg.set_device(device);
+        let mut wg = wireguard_uapi::WgSocket::connect().unwrap();
+        let resp;
+        match wg.set_device(device) {
+            Ok(()) => {
+                resp = PeerPushStatus { added: true };
+            }
+            Err(_) => {
+                resp = PeerPushStatus { added: false };
+            }
+        };
 
-    // println!("{:?}", device);
+        Ok(Response::new(resp))
+    }
+}
 
-    while true {}
+#[tokio::main]
+async fn main() {
+    let addr = "0.0.0.0:3000".parse().unwrap();
+    let wg_server = MyWg::default();
 
-    Ok(())
+    Server::builder()
+        .add_service(WgServer::new(wg_server))
+        .serve(addr)
+        .await;
 }
