@@ -5,18 +5,20 @@ service Keys {
     // For wg_server
     rpc get_all_peers(Empty) returns (Peers);
 
-    // For configgen
+    // For config_server
     rpc get_allowed_ip(User) returns (AllowedIp);
 
     // For frontend
     rpc set_pubkey(UserPubkey) returns (Success);
+    rpc get_peer(User) returns (Peer);
+
 }
 
 service Wg {
     rpc push_new_peer(Peer) returns (Success);
 }
 
-service ConfigGen {
+service Config {
     rpc get_config(User) returns (UserConfig);
 }
 
@@ -24,6 +26,7 @@ service ConfigGen {
 // Messages
 //
 
+// Success is empty because errors are handled via gRPC status codes
 message Success {}
 message Empty {}
 
@@ -61,10 +64,7 @@ message UserConfig {
         repeated string allowed_ips = 3;
     }
 
-    uint32 user_address = 1; // get_user_address
+    uint32 user_address = 1; // get_allowed_ip
     ServerPeer server_peer = 2; // hardcoded
     string dns = 3; // hardcoded
 }
-
-message UserPubkeyStatus { bool added = 1; }
-message PeerPushStatus   { bool added = 1; }

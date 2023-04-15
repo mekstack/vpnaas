@@ -2,9 +2,12 @@
 
 ## Expected redis structure
 
-- SET available_ips
-- HASH user:to:allowed_ip
-- HASH allowed_ip:to:pubkey
+> Validation not required for data received from `Keys` as it ensures it's correctness.
+> Pubkey.bytes is always 32 bytes long, username is never ""
+
+- SET available_ips -- available and unallocated ips
+- HASH user:to:allowed_ip -- maps user to allowed_ip
+- HASH allowed_ip:to:pubkey -- wireguard peers
 
 ### Flows
 
