@@ -3,17 +3,17 @@ package vpnaas;
 
 service Keys {
     // For wg_server
-    rpc get_all_peers(AllPeersRequest) returns (AllPeers);
+    rpc get_all_peers(Empty) returns (Peers);
 
     // For configgen
-    rpc get_user_address(User) returns (Address);
+    rpc get_allowed_ip(User) returns (AllowedIp);
 
     // For frontend
-    rpc set_pubkey_user(UserPubkey) returns (UserPubkeyStatus);
+    rpc set_pubkey(UserPubkey) returns (Success);
 }
 
 service Wg {
-    rpc push_new_peer(Peer) returns (PeerPushStatus);
+    rpc push_new_peer(Peer) returns (Success);
 }
 
 service ConfigGen {
@@ -24,6 +24,14 @@ service ConfigGen {
 // Messages
 //
 
+message Success {}
+message Empty {}
+
+// Pubkey is a separate struct to idiomatically implement From<Pubkey> for [u8; 32]
+message Pubkey {
+    bytes bytes = 1;
+}
+
 message User {
     string username = 1;
 }
@@ -33,23 +41,22 @@ message Peer {
     uint32 allowed_ip = 2;
 }
 
-message Address {
-    uint32 address = 1;
+message AllowedIp {
+    uint32 allowed_ip = 1;
 }
 
 message UserPubkey {
     User user = 1;
-    bytes pubkey = 2;
+    Pubkey pubkey = 2;
 }
 
-message AllPeersRequest {}
-message AllPeers {
+message Peers {
     repeated Peer peers = 1;
 }
 
 message UserConfig {
     message ServerPeer {
-        bytes pubkey = 1;
+        Pubkey pubkey = 1;
         string endpoint = 2;
         repeated string allowed_ips = 3;
     }
