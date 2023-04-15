@@ -1,6 +1,7 @@
 # vpnaas
 
-## Redis structure
+## Expected redis structure
 
-- user:to:allowed_ip
-- allowed_ip:to:pubkey
+- SET available_ips
+- HASH user:to:allowed_ip
+- HASH allowed_ip:to:pubkey
