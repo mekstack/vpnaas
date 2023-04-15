@@ -16,3 +16,7 @@
 1. `SPOP` an `ip` from `available_ips`
 2. `HSET` `user:to:allowed_ip` to `{{ user }}`:`ip`
 2. `HSET` `allowed_ip:to:pubkey` to `ip`:`{{ pubkey }}`
+
+## Test
+
+    cargo test -- --test-threads=1
