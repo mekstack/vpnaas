@@ -6,11 +6,10 @@ service Keys {
     rpc get_all_peers(Empty) returns (Peers);
 
     // For config_server
-    rpc get_allowed_ip(User) returns (AllowedIp);
+    rpc get_peer(User) returns (Peer);
 
     // For frontend
     rpc set_pubkey(UserPubkey) returns (Success);
-    rpc get_peer(User) returns (Peer);
 
 }
 
@@ -30,27 +29,23 @@ service Config {
 message Success {}
 message Empty {}
 
+message User {
+    string username = 1;
+}
+
 // Pubkey is a separate struct to idiomatically implement From<Pubkey> for [u8; 32]
 message Pubkey {
     bytes bytes = 1;
 }
 
-message User {
-    string username = 1;
+message UserPubkey {
+    User user = 1;
+    Pubkey pubkey = 2;
 }
 
 message Peer {
     bytes pubkey = 1;
     uint32 allowed_ip = 2;
-}
-
-message AllowedIp {
-    uint32 allowed_ip = 1;
-}
-
-message UserPubkey {
-    User user = 1;
-    Pubkey pubkey = 2;
 }
 
 message Peers {
