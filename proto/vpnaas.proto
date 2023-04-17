@@ -44,7 +44,7 @@ message UserPubkey {
 }
 
 message Peer {
-    bytes pubkey = 1;
+    Pubkey pubkey = 1;
     uint32 ip = 2;
 }
 

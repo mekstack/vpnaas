@@ -1,5 +1,5 @@
 use crate::vpnaas;
-use crate::vpnaas::proto::{Empty, Peer, Peers, Success, User, UserPubkey};
+use crate::vpnaas::proto::{Empty, Peer, Peers, Pubkey, Success, User, UserPubkey};
 
 use redis::Commands;
 use std::net::Ipv4Addr;
@@ -50,6 +50,15 @@ impl Keys {
             .map_err(|e| Status::from_error(e.into()))?
             .ok_or(Status::resource_exhausted("No IPs left in pool"))
     }
+
+    async fn wg_server_client(&self) -> vpnaas::WgClient<tonic::transport::Channel> {
+        let channel = tonic::transport::Channel::from_static("http://127.0.0.1:4242")
+            .connect()
+            .await
+            .expect("Connection to Wg server failed");
+
+        vpnaas::WgClient::new(channel)
+    }
 }
 
 #[tonic::async_trait]
@@ -62,6 +71,16 @@ impl vpnaas::proto::keys_server::Keys for Keys {
             .hset("ip:to:pubkey", &ip, &pubkey)
             .map_err(|e| Status::from_error(e.into()))?;
 
+        self.wg_server_client()
+            .await
+            .push_new_peer(Peer {
+                ip,
+                pubkey: Some(Pubkey {
+                    bytes: pubkey.into(),
+                }),
+            })
+            .await?;
+
         Ok(Response::new(Success::default()))
     }
 
@@ -70,18 +89,23 @@ impl vpnaas::proto::keys_server::Keys for Keys {
         let username: String = request.into_inner().try_into()?;
 
         let ip: u32 = redis
-            .hget("username:to:ip", &username)
-            .map_err(|_| Status::not_found("User has no allocated IP"))?;
+            .hget::<_, _, Option<_>>("username:to:ip", &username)
+            .map_err(|e| Status::from_error(e.into()))?
+            .ok_or(Status::not_found("User has no allocated IP"))?;
 
         let pubkey: Vec<u8> = redis
-            .hget("ip:to:pubkey", &ip)
-            .map_err(|_| Status::not_found("IP has no associated public key"))?;
+            .hget::<_, _, Option<_>>("ip:to:pubkey", &ip)
+            .map_err(|e| Status::from_error(e.into()))?
+            .ok_or(Status::not_found("IP has no associated public key"))?;
 
         if pubkey.len() != 32 {
             return Err(Status::invalid_argument("Public key length is incorrect"));
         }
 
-        Ok(Response::new(Peer { ip, pubkey }))
+        Ok(Response::new(Peer {
+            ip,
+            pubkey: Some(Pubkey { bytes: pubkey }),
+        }))
     }
 
     async fn get_all_peers(&self, request: Request<Empty>) -> Result<Response<Peers>, Status> {
@@ -101,7 +125,10 @@ impl vpnaas::proto::keys_server::Keys for Keys {
                     true
                 }
             })
-            .map(|(ip, pubkey)| Peer { ip, pubkey })
+            .map(|(ip, pubkey)| Peer {
+                ip,
+                pubkey: Some(Pubkey { bytes: pubkey }),
+            })
             .collect();
 
         Ok(Response::new(Peers { peers }))

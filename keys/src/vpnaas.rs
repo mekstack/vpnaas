@@ -4,6 +4,7 @@ pub mod proto {
 
 pub use proto::keys_client::KeysClient;
 pub use proto::keys_server::KeysServer;
+pub use proto::wg_client::WgClient;
 
 use proto::{User, UserPubkey};
 use tonic::Status;

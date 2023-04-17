@@ -26,10 +26,7 @@ mod tests {
         redis::cmd("FLUSHDB").query::<()>(&mut c).unwrap();
 
         let _: i32 = c
-            .sadd(
-                "ip_pool",
-                vec![u32::from(Ipv4Addr::new(192, 168, 1, 1))],
-            )
+            .sadd("ip_pool", vec![u32::from(Ipv4Addr::new(192, 168, 1, 1))])
             .unwrap();
     }
 
@@ -69,7 +66,9 @@ mod tests {
         assert!(
             peer == Peer {
                 ip: u32::from(Ipv4Addr::new(192, 168, 1, 1)),
-                pubkey: base64::decode(pubkey_b64).unwrap()
+                pubkey: Some(Pubkey {
+                    bytes: base64::decode(pubkey_b64).unwrap()
+                }),
             }
         )
     }
