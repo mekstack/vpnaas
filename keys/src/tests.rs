@@ -68,14 +68,14 @@ mod tests {
 
         assert!(
             peer == Peer {
-                allowed_ip: u32::from(Ipv4Addr::new(192, 168, 1, 1)),
+                ip: u32::from(Ipv4Addr::new(192, 168, 1, 1)),
                 pubkey: base64::decode(pubkey_b64).unwrap()
             }
         )
     }
 
     #[tokio::test]
-    async fn test_get_allowed_ip_fail() {
+    async fn test_get_peer_fail() {
         // Test failure when user was not added
         todo!()
     }

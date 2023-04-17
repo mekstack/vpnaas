@@ -45,7 +45,7 @@ message UserPubkey {
 
 message Peer {
     bytes pubkey = 1;
-    uint32 allowed_ip = 2;
+    uint32 ip = 2;
 }
 
 message Peers {
@@ -59,7 +59,7 @@ message UserConfig {
         repeated string allowed_ips = 3;
     }
 
-    uint32 user_address = 1; // get_allowed_ip
+    uint32 user_address = 1;
     ServerPeer server_peer = 2; // hardcoded
     string dns = 3; // hardcoded
 }
