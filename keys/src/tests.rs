@@ -27,7 +27,7 @@ mod tests {
 
         let _: i32 = c
             .sadd(
-                "allowed_ips",
+                "ip_pool",
                 vec![u32::from(Ipv4Addr::new(192, 168, 1, 1))],
             )
             .unwrap();

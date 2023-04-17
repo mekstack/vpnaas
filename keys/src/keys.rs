@@ -11,7 +11,7 @@ local username = KEYS[1]
 local allowed_ip = redis.call("HGET", "username:to:allowed_ip", username)
 
 if not allowed_ip then
-    allowed_ip = redis.call("SPOP", "allowed_ips")
+    allowed_ip = redis.call("SPOP", "ip_pool")
 
     if allowed_ip then
         redis.call("HSET", "username:to:allowed_ip", username, allowed_ip)

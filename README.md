@@ -13,7 +13,7 @@
 
 #### Add a new `{{ user }}` with `{{ pubkey }}`
 
-1. `SPOP` an `ip` from `available_ips`
+1. `SPOP` an `ip` from `ip_pool`
 2. `HSET` `user:to:allowed_ip` to `{{ user }}`:`ip`
 2. `HSET` `allowed_ip:to:pubkey` to `ip`:`{{ pubkey }}`
 
