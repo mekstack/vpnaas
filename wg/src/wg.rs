@@ -7,7 +7,7 @@ use wireguard_uapi::{DeviceInterface as WgDeviceInterface, WgSocket};
 use crate::vpnaas;
 use crate::vpnaas::proto::{Empty, Success};
 
-pub struct Wg {
+pub struct WgServer {
     device: Mutex<WgDevice>,
     socket: Mutex<WgSocket>,
 }
@@ -20,8 +20,8 @@ async fn keys_client() -> vpnaas::KeysClient<tonic::transport::Channel> {
     vpnaas::KeysClient::new(channel)
 }
 
-impl Wg {
-    pub async fn new(private_key: [u8; 32]) -> Wg {
+impl WgServer {
+    pub async fn new(private_key: [u8; 32]) -> WgServer {
         let mut client = keys_client().await;
         let mut socket = WgSocket::connect().expect("Could not connect to wg socket");
 
@@ -50,7 +50,7 @@ impl Wg {
             .set_device(&device)
             .expect("Wireguard device setup failed");
 
-        Wg {
+        WgServer {
             device: Mutex::new(device),
             socket: Mutex::new(socket),
         }
@@ -58,7 +58,7 @@ impl Wg {
 }
 
 #[tonic::async_trait]
-impl vpnaas::proto::wg_server::Wg for Wg {
+impl vpnaas::proto::wg_server::Wg for WgServer {
     async fn push_new_peer(
         &self,
         request: Request<vpnaas::proto::Peer>,

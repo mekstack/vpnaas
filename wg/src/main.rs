@@ -3,10 +3,8 @@ use std::env;
 use base64::{engine::general_purpose::STANDARD_NO_PAD as base64, Engine as _};
 use tonic::transport::Server;
 
-use vpnaas::WgServer;
-
 mod vpnaas;
-mod wg_server;
+mod wg;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -16,10 +14,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Invalid private key length");
 
     let addr = "0.0.0.0:4242".parse()?;
-    let wg_server = wg_server::Wg::new(privkey).await;
+    let wg_server = wg::WgServer::new(privkey).await;
 
     Server::builder()
-        .add_service(WgServer::new(wg_server))
+        .add_service(vpnaas::WgServer::new(wg_server))
         .serve(addr)
         .await?;
 
