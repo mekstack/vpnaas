@@ -10,11 +10,10 @@ service Keys {
 
     // For frontend
     rpc set_pubkey(UserPubkey) returns (Success);
-
 }
 
 service Wg {
-    rpc push_new_peer(Peer) returns (Success);
+    rpc push_peer_update(Peer) returns (Success);
 }
 
 service Config {

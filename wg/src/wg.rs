@@ -59,14 +59,24 @@ impl WgServer {
 
 #[tonic::async_trait]
 impl vpnaas::proto::wg_server::Wg for WgServer {
-    async fn push_new_peer(
+    async fn push_peer_update(
         &self,
         request: Request<vpnaas::proto::Peer>,
     ) -> Result<Response<Success>, Status> {
-        let peer = request.into_inner().try_into()?;
+        let new_peer: WgPeer = request.into_inner().try_into()?;
 
         let mut device = self.device.lock().await;
-        device.peers.push(peer);
+
+        if let Some(peer) = device
+            .peers
+            .iter_mut()
+            .find(|peer| peer.allowed_ips == new_peer.allowed_ips)
+        {
+            *peer = new_peer;
+        } else {
+            device.peers.push(new_peer);
+        }
+
         self.socket
             .lock()
             .await

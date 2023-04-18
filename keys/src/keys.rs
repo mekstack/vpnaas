@@ -73,7 +73,7 @@ impl vpnaas::proto::keys_server::Keys for KeysServer {
 
         self.wg_server_client()
             .await
-            .push_new_peer(Peer {
+            .push_peer_update(Peer {
                 ip,
                 pubkey: Some(Pubkey {
                     bytes: pubkey.into(),
