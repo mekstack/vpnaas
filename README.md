@@ -1,5 +1,15 @@
 # vpnaas
 
+## wg
+
+Wireguard Server that adds peers via gRPC
+
+### Configuration
+
+- env `$WG_SERVER_PRIVKEY`: a base64 encoded 32 bit private key
+- wireguard interface `wg0`
+- `setcap CAP_NET_ADMIN=+eip`
+
 ## Expected redis structure
 
 > Validation not required for data received from `Keys` as it ensures it's correctness.
