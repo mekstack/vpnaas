@@ -1,88 +1,115 @@
-use tokio::sync::Mutex;
-use tonic::{Request, Response, Status};
+use futures::StreamExt;
+use netlink_packet_core::{NetlinkMessage, NetlinkPayload, NLM_F_ACK, NLM_F_REQUEST};
+use netlink_packet_generic::GenlMessage;
+use netlink_packet_wireguard::constants::AF_INET;
+use netlink_packet_wireguard::nlas;
+use netlink_packet_wireguard::nlas::{WgAllowedIp, WgAllowedIpAttrs, WgDeviceAttrs, WgPeerAttrs};
+use netlink_packet_wireguard::{Wireguard, WireguardCmd};
+use std::net::IpAddr;
 
-use wireguard_uapi::set::{Device as WgDevice, Peer as WgPeer};
-use wireguard_uapi::{DeviceInterface as WgDeviceInterface, WgSocket};
+type BoxedError = Box<dyn std::error::Error + Send + Sync + 'static>;
 
-use crate::vpnaas;
-use crate::vpnaas::proto::{Empty, Success};
-
-pub struct WgServer {
-    device: Mutex<WgDevice>,
-    socket: Mutex<WgSocket>,
+pub struct WgDevice {
+    ifname: String,
+    private_key: [u8; 32],
+    listen_port: u16,
+    peers: Vec<WgPeer>,
 }
 
-async fn keys_client() -> vpnaas::KeysClient<tonic::transport::Channel> {
-    let channel = tonic::transport::Channel::from_static("http://127.0.0.1:3000")
-        .connect()
+#[derive(Debug)]
+pub struct WgPeer {
+    pub public_key: [u8; 32],
+    pub allowed_ip: IpAddr,
+}
+
+impl WgDevice {
+    pub async fn new(ifname: &str, listen_port: u16, private_key: [u8; 32]) -> Self {
+        set_device(vec![
+            WgDeviceAttrs::IfName(ifname.to_string()),
+            WgDeviceAttrs::PrivateKey(private_key.clone()),
+            WgDeviceAttrs::ListenPort(listen_port),
+        ])
         .await
-        .expect("Connection to Keys server failed");
-    vpnaas::KeysClient::new(channel)
-}
+        .unwrap();
 
-impl WgServer {
-    pub async fn new(private_key: [u8; 32]) -> WgServer {
-        let mut client = keys_client().await;
-        let mut socket = WgSocket::connect().expect("Could not connect to wg socket");
-
-        let peers = client
-            .get_all_peers(Empty::default())
-            .await
-            .expect("Could not get peers from Keys server")
-            .into_inner()
-            .peers;
-
-        let peers: Vec<WgPeer> = peers
-            .into_iter()
-            .filter_map(|p| p.try_into().ok())
-            .collect();
-
-        let device = WgDevice {
-            interface: WgDeviceInterface::Name("wg0".to_string()),
+        WgDevice {
+            ifname: ifname.to_string(),
             private_key,
-            listen_port: 6969,
-            fwmark: None,
-            flags: vec![],
-            peers,
-        };
-
-        socket
-            .set_device(&device)
-            .expect("Wireguard device setup failed");
-
-        WgServer {
-            device: Mutex::new(device),
-            socket: Mutex::new(socket),
+            listen_port,
+            peers: vec![],
         }
     }
-}
 
-#[tonic::async_trait]
-impl vpnaas::proto::wg_server::Wg for WgServer {
-    async fn push_peer_update(
-        &self,
-        request: Request<vpnaas::proto::Peer>,
-    ) -> Result<Response<Success>, Status> {
-        let new_peer: WgPeer = request.into_inner().try_into()?;
-
-        let mut device = self.device.lock().await;
-
-        if let Some(peer) = device
+    pub async fn update_peer(&mut self, new_peer: WgPeer) -> Result<(), BoxedError> {
+        if let Some(peer) = self
             .peers
             .iter_mut()
-            .find(|peer| peer.allowed_ips == new_peer.allowed_ips)
+            .find(|peer| peer.allowed_ip == new_peer.allowed_ip)
         {
             *peer = new_peer;
         } else {
-            device.peers.push(new_peer);
+            self.peers.push(new_peer);
         }
 
-        self.socket
-            .lock()
-            .await
-            .set_device(&device)
-            .map_err(|e| Status::from_error(e.into()))?;
-
-        Ok(Response::new(Success::default()))
+        self.set_peers().await
     }
+
+    pub async fn extend_peers(&mut self, new_peers: Vec<WgPeer>) -> Result<(), BoxedError> {
+        if new_peers.len() == 0 {
+            return Ok(());
+        }
+        self.peers = new_peers;
+        self.set_peers().await
+    }
+
+    async fn set_peers(&self) -> Result<(), BoxedError> {
+        let device_attrs = vec![
+            WgDeviceAttrs::IfName(self.ifname.clone()),
+            WgDeviceAttrs::Peers(
+                self.peers
+                    .iter()
+                    .map(|short_peer| nlas::WgPeer {
+                        0: vec![
+                            WgPeerAttrs::PublicKey(short_peer.public_key.clone()),
+                            WgPeerAttrs::AllowedIps {
+                                0: vec![WgAllowedIp {
+                                    0: vec![
+                                        WgAllowedIpAttrs::IpAddr(short_peer.allowed_ip),
+                                        WgAllowedIpAttrs::Cidr(32),
+                                        WgAllowedIpAttrs::Family(AF_INET),
+                                    ],
+                                }],
+                            },
+                        ],
+                    })
+                    .collect(),
+            ),
+        ];
+
+        set_device(device_attrs).await
+    }
+}
+
+async fn set_device(device_attributes: Vec<WgDeviceAttrs>) -> Result<(), BoxedError> {
+    let (connection, mut handle, _) = genetlink::new_connection()?;
+    tokio::spawn(connection);
+
+    let genlmsg: GenlMessage<Wireguard> = GenlMessage::from_payload(Wireguard {
+        cmd: WireguardCmd::SetDevice,
+        nlas: device_attributes,
+    });
+
+    let mut nlmsg = NetlinkMessage::from(genlmsg);
+    nlmsg.header.flags = NLM_F_REQUEST | NLM_F_ACK;
+
+    let mut res = handle.request(nlmsg).await?;
+    while let Some(rx_packet) = res.next().await {
+        println!("SUSSY BAKA");
+        match rx_packet?.payload {
+            NetlinkPayload::Error(e) => return Err(e.to_string().into()),
+            _ => (),
+        };
+    }
+
+    Ok(())
 }

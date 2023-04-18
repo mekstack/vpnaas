@@ -8,9 +8,10 @@ pub use proto::wg_server::WgServer;
 
 use proto::{Peer, Pubkey};
 
+use crate::wg::WgPeer;
+use std::net::IpAddr;
 use std::net::Ipv4Addr;
 use tonic::Status;
-use wireguard_uapi::set::{AllowedIp as WgAllowedIp, Peer as WgPeer};
 
 impl TryFrom<Pubkey> for [u8; 32] {
     type Error = Status;
@@ -32,8 +33,7 @@ impl TryFrom<Peer> for WgPeer {
         if peer.ip == 0 {
             return Err(Status::invalid_argument("IP is not specified"));
         }
-
-        let ip = WgAllowedIp::from_ipaddr(&Ipv4Addr::from(peer.ip).into());
+        let ip = Ipv4Addr::from(peer.ip);
 
         let pubkey = peer
             .pubkey
@@ -45,13 +45,8 @@ impl TryFrom<Peer> for WgPeer {
             })?;
 
         Ok(WgPeer {
-            allowed_ips: vec![ip],
+            allowed_ip: IpAddr::from(ip),
             public_key: pubkey,
-            flags: vec![],
-            preshared_key: None,
-            endpoint: None,
-            persistent_keepalive_interval: None,
-            protocol_version: None,
         })
     }
 }
