@@ -6,7 +6,7 @@ Wireguard Server that adds peers via gRPC
 
 ### Configuration
 
-- env `$WG_SERVER_PRIVKEY`: a base64 encoded 32 bit private key
+- env `$WG_SERVER_PRIVKEY`: a base64 encoded 32 bit private key without padding
 - wireguard interface `wg0`
 - `setcap CAP_NET_ADMIN=+eip`
 
