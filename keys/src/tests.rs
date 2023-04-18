@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod tests {
-    use crate::keys::Keys;
+    use crate::keys::KeysServer;
     use crate::vpnaas;
     use crate::vpnaas::proto::{Peer, Pubkey, User, UserPubkey};
 
@@ -14,7 +14,7 @@ mod tests {
 
         tokio::spawn(async move {
             Server::builder()
-                .add_service(vpnaas::KeysServer::new(Keys::new()))
+                .add_service(vpnaas::KeysServer::new(KeysServer::new()))
                 .serve_with_incoming(tokio_stream::wrappers::TcpListenerStream::new(listener))
                 .await
                 .unwrap();

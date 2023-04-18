@@ -21,16 +21,16 @@ end
 return ip
 "#;
 
-pub struct Keys {
+pub struct KeysServer {
     redis_connection_pool: r2d2::Pool<redis::Client>,
 }
 
-impl Keys {
-    pub fn new() -> Keys {
+impl KeysServer {
+    pub fn new() -> KeysServer {
         let client = redis::Client::open("redis://127.0.0.1/").unwrap();
         let pool = r2d2::Pool::builder().max_size(15).build(client).unwrap();
 
-        Keys {
+        KeysServer {
             redis_connection_pool: pool,
         }
     }
@@ -62,7 +62,7 @@ impl Keys {
 }
 
 #[tonic::async_trait]
-impl vpnaas::proto::keys_server::Keys for Keys {
+impl vpnaas::proto::keys_server::Keys for KeysServer {
     async fn set_pubkey(&self, request: Request<UserPubkey>) -> Result<Response<Success>, Status> {
         let (username, pubkey): (String, [u8; 32]) = request.into_inner().try_into()?;
         let ip: u32 = self.getset_ip(username)?;
