@@ -59,13 +59,15 @@ impl KeysServer {
             .ok_or(Status::resource_exhausted("No IPs left in pool"))
     }
 
-    async fn wg_server_client(&self) -> vpnaas::WgClient<tonic::transport::Channel> {
+    async fn wg_server_client(
+        &self,
+    ) -> Result<vpnaas::WgClient<tonic::transport::Channel>, Status> {
         let channel = tonic::transport::Channel::from_static("http://127.0.0.1:4242")
             .connect()
             .await
-            .expect("Connection to Wg server failed");
+            .map_err(|_| Status::unavailable("Connection to Wireguard Server failed"))?;
 
-        vpnaas::WgClient::new(channel)
+        Ok(vpnaas::WgClient::new(channel))
     }
 }
 
@@ -83,7 +85,7 @@ impl vpnaas::proto::keys_server::Keys for KeysServer {
             .map_err(|e| Status::from_error(e.into()))?;
 
         self.wg_server_client()
-            .await
+            .await?
             .push_peer_update(Peer {
                 ip,
                 pubkey: Some(Pubkey {
