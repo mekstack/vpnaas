@@ -10,6 +10,8 @@ prost = "0.11.8"
 tonic = "0.9.1"
 r2d2 = "0.8.10"
 base64 = "0.21.0"
+jsonwebtoken = "8.3.0"
+serde = "1.0.160"
 
 [build-dependencies]
 tonic-build = "0.9.1"

@@ -14,7 +14,19 @@ mod tests {
 
         tokio::spawn(async move {
             Server::builder()
-                .add_service(vpnaas::KeysServer::new(KeysServer::new()))
+                .add_service(vpnaas::KeysServer::new({
+                    let client = redis::Client::open("redis://127.0.0.1/").unwrap();
+                    let pool = r2d2::Pool::builder()
+                        .connection_timeout(Duration::from_secs(5))
+                        .max_size(15)
+                        .build(client)
+                        .unwrap();
+
+                    KeysServer {
+                        redis_connection_pool: pool,
+                        jwt,
+                    }
+                }))
                 .serve_with_incoming(tokio_stream::wrappers::TcpListenerStream::new(listener))
                 .await
                 .unwrap();

@@ -1,8 +1,10 @@
 use crate::vpnaas;
 use crate::vpnaas::proto::{Empty, Peer, Peers, Pubkey, Success, User, UserPubkey};
 
+use crate::jwt;
 use redis::Commands;
 use std::net::Ipv4Addr;
+use std::time::Duration;
 use tonic::{Request, Response, Status};
 
 const GETSET_IP_SCRIPT: &str = r#"
@@ -23,15 +25,21 @@ return ip
 
 pub struct KeysServer {
     redis_connection_pool: r2d2::Pool<redis::Client>,
+    jwt: jwt::JwtValidator,
 }
 
 impl KeysServer {
-    pub fn new() -> KeysServer {
+    pub fn new(jwt: jwt::JwtValidator) -> KeysServer {
         let client = redis::Client::open("redis://127.0.0.1/").unwrap();
-        let pool = r2d2::Pool::builder().max_size(15).build(client).unwrap();
+        let pool = r2d2::Pool::builder()
+            .connection_timeout(Duration::from_secs(1))
+            .max_size(15)
+            .build(client)
+            .unwrap();
 
         KeysServer {
             redis_connection_pool: pool,
+            jwt,
         }
     }
 
@@ -64,7 +72,10 @@ impl KeysServer {
 #[tonic::async_trait]
 impl vpnaas::proto::keys_server::Keys for KeysServer {
     async fn set_pubkey(&self, request: Request<UserPubkey>) -> Result<Response<Success>, Status> {
-        let (username, pubkey): (String, [u8; 32]) = request.into_inner().try_into()?;
+        let (metadata, _, inner) = request.into_parts();
+        let (username, pubkey): (String, [u8; 32]) = inner.try_into()?;
+        self.jwt.validate(&username, &metadata)?;
+
         let ip: u32 = self.getset_ip(username)?;
 
         self.redis()?
