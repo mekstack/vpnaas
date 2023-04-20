@@ -16,7 +16,7 @@ service Wg {
     rpc push_peer_update(Peer) returns (Success);
 }
 
-service Config {
+service Confus {
     rpc get_config(User) returns (UserConfig);
 }
 
@@ -58,7 +58,7 @@ message UserConfig {
         repeated string allowed_ips = 3;
     }
 
-    uint32 user_address = 1;
+    Peer user_peer = 1;
     ServerPeer server_peer = 2; // hardcoded
     string dns = 3; // hardcoded
 }
