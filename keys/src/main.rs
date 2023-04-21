@@ -12,10 +12,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let jwt_secret_key = env::var("JWT_SECRET_KEY").expect("JWT_SECRET_KEY variable is unset");
     let jwt = jwt::JwtValidator::new(jwt_secret_key);
-    let keys_server = keys::KeysServer::new(jwt);
+    let keys_server = vpnaas::KeysServer::new(keys::KeysServer::new(jwt));
 
     Server::builder()
-        .add_service(vpnaas::KeysServer::new(keys_server))
+        .accept_http1(true)
+        .add_service(tonic_web::enable(keys_server))
         .serve(addr)
         .await?;
 
