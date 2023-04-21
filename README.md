@@ -1,24 +1,44 @@
 # vpnaas
 
-## wg
+## Redis
 
-Wireguard Server that adds peers via gRPC
+- SET `ip_pool` -- available and unallocated ips in decimal
+- HASH `user:to:ip` -- maps user to allowed_ip
+- HASH `ip:to:pubkey` -- wireguard peers
+
+## Wg
+
+Wireguard Server with gRPC peer management
 
 ### Configuration
 
-- env `$WG_SERVER_PRIVKEY`: a base64 encoded 32 bit private key without padding
-- wireguard interface `wg0`
-- `setcap CAP_NET_ADMIN=+eip`
+- `WG_SERVER_PRIVKEY`: a base64 encoded 32 bit private key without padding
 
-## Expected redis structure
+Wireguard interface `wg0` must exist
 
-- SET ip_pool -- available and unallocated ips in decimal
-- HASH user:to:ip -- maps user to allowed_ip
-- HASH ip:to:pubkey -- wireguard peers
+sudo or `setcap CAP_NET_ADMIN=+eip`
 
-## Test
+## Keys
 
-    cargo test -- --test-threads=1
+Manages users, allowed_ips and public keys
+
+### Configuration
+
+- `JWT_SECRET_KEY`: for JWT signing
+
+## Confus
+
+> im confus
+
+Generates wg0.conf for user
+
+### Configuration
+
+- `WG_SERVER_ENDPOINT`: publicly accessible address of wireguard server
+- `WG_SERVER_PUBKEY`: pulic key of wireguard server peer
+- `ALLOWED_IPS`: space separated list of networks that will be accessible via wireguard server
+- `KEYS_URL`: url of Keys microservice
+- `DNS_CONFIG`: string that will go into DNS field of wg0.conf
 
 ## web
 
