@@ -2,11 +2,15 @@
     export let wireguardConfig: string;
     export let copyText: string;
     export let username: string;
+    export let displayConfig: boolean = true;
+    export let userPubkey: string;
 
     import { onMount } from "svelte";
 
     import { ConfusClient } from "../grpc/VpnaasServiceClientPb";
     import { User, UserConfig } from "../grpc/vpnaas_pb";
+    import { addError } from "../stores/errorStore";
+    import { StatusCode } from "grpc-web";
 
     onMount(async () => {
         const configReq = new ConfusClient("http://127.0.0.1:4448").get_config(
@@ -14,9 +18,18 @@
             {},
             (err, config) => {
                 if (err) {
-                    console.error(err);
+                    if (err.code === StatusCode.NOT_FOUND) {
+                        displayConfig = false;
+                    } else {
+                        console.error(err);
+                        addError(
+                            "Error fetching Wireguard configuration: " +
+                                err.message
+                        );
+                    }
                     return;
                 }
+                userPubkey = config.getUserPeer().getPubkey()?.getBytes_asB64() || "";
                 wireguardConfig = generateWireguardConfig(config);
             }
         );
@@ -67,13 +80,16 @@ Endpoint = ${endpoint}
     }
 </script>
 
-<div class="config-container">
-    <label class="config-label">Your wg0.conf:</label>
-    <div class="copy-container">
-        <button class="copy-button" on:click={copyConfig}>{copyText}</button>
+{#if displayConfig}
+    <div class="config-container">
+        <label class="config-label">Your wg0.conf:</label>
+        <div class="copy-container">
+            <button class="copy-button" on:click={copyConfig}>{copyText}</button
+            >
+        </div>
+        <textarea class="config-box" readonly>{wireguardConfig}</textarea>
     </div>
-    <textarea class="config-box" readonly>{wireguardConfig}</textarea>
-</div>
+{/if}
 
 <style>
     .config-box {
@@ -127,5 +143,11 @@ Endpoint = ${endpoint}
 
     .copy-button:hover {
         color: white;
+    }
+
+    .copy-button:active {
+        color: black;
+        background-color: limegreen;
+        border-radius: 0;
     }
 </style>

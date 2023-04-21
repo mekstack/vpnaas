@@ -8,18 +8,16 @@
 </script>
 
 <div class="right">
-    <span class="username">
+    <h1>
         {username}<button class="logout-button" on:click={logout}>-></button>
-    </span>
+    </h1>
 </div>
 
 <style>
-    .username {
-        font-size: 1.5em;
-    }
-
     .right {
-        padding: 1em 2em;
+        display: flex;
+        padding: 0em 2em;
+        flex-direction: column;
     }
 
     .logout-button {
