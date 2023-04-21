@@ -1,39 +1,14 @@
 <script lang="ts">
-    export let wireguardConfig: string;
-    export let copyText: string;
-    export let username: string;
-    export let displayConfig: boolean = true;
-    export let userPubkey: string;
+    export let userConfig: UserConfig;
 
-    import { onMount } from "svelte";
+    import type { UserConfig } from "../grpc/vpnaas_pb";
 
-    import { ConfusClient } from "../grpc/VpnaasServiceClientPb";
-    import { User, UserConfig } from "../grpc/vpnaas_pb";
-    import { addError } from "../stores/errorStore";
-    import { StatusCode } from "grpc-web";
+    let copyText = "copy";
+    let renderedConfig = "";
 
-    onMount(async () => {
-        const configReq = new ConfusClient("http://127.0.0.1:4448").get_config(
-            new User().setUsername(username),
-            {},
-            (err, config) => {
-                if (err) {
-                    if (err.code === StatusCode.NOT_FOUND) {
-                        displayConfig = false;
-                    } else {
-                        console.error(err);
-                        addError(
-                            "Error fetching Wireguard configuration: " +
-                                err.message
-                        );
-                    }
-                    return;
-                }
-                userPubkey = config.getUserPeer().getPubkey()?.getBytes_asB64() || "";
-                wireguardConfig = generateWireguardConfig(config);
-            }
-        );
-    });
+    if (userConfig) {
+        renderedConfig = generateWireguardConfig(userConfig);
+    }
 
     async function copyConfig() {
         const configTextArea = document.querySelector(
@@ -80,14 +55,14 @@ Endpoint = ${endpoint}
     }
 </script>
 
-{#if displayConfig}
+{#if renderedConfig}
     <div class="config-container">
         <label class="config-label">Your wg0.conf:</label>
         <div class="copy-container">
             <button class="copy-button" on:click={copyConfig}>{copyText}</button
             >
         </div>
-        <textarea class="config-box" readonly>{wireguardConfig}</textarea>
+        <textarea class="config-box" readonly>{renderedConfig}</textarea>
     </div>
 {/if}
 

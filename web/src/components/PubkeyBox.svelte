@@ -1,19 +1,20 @@
 <script lang="ts">
     export let userPubkey: string;
-    export let pubkeyBoxLabel: string;
     export let username: string;
     export let accessToken: string;
-    export let setPubkeyText: string;
+    export let fetchUserConfig: () => Promise<void>;
 
     import { addError } from "../stores/errorStore";
     import { KeysClient } from "../grpc/VpnaasServiceClientPb";
     import { User, UserPubkey, Pubkey } from "../grpc/vpnaas_pb";
 
-    $: if (userPubkey && pubkeyBoxLabel !== "Your public key:") {
+    let setPubkeyText = "set";
+
+    let pubkeyBoxLabel = "Enter your public key:";
+
+    if (userPubkey) {
         pubkeyBoxLabel = "Your public key:";
     }
-
-    setPubkeyText = "set";
     async function setPubkey() {
         // Decode the base64-encoded string and convert it to a Uint8Array
         const decodedKey = atob(userPubkey);
@@ -33,9 +34,10 @@
                     addError("Error setting public key: " + err.message);
                     return;
                 }
-                console.log("Public key added successfully.");
                 setPubkeyText = "set!";
                 pubkeyBoxLabel = "Your public key:";
+                // dispatch event to load config
+                fetchUserConfig();
             }
         );
     }

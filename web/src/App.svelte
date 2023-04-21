@@ -6,27 +6,59 @@
     import LoginButton from "./components/LoginButton.svelte";
     import ErrorBox from "./components/ErrorBox.svelte";
     import errorStore from "./stores/errorStore";
+    import { addError } from "./stores/errorStore";
 
     import jwtDecode from "jwt-decode";
+    import { onMount } from "svelte";
+    import { StatusCode } from "grpc-web";
 
-    let userPubkey = "";
+    import { ConfusClient } from "./grpc/VpnaasServiceClientPb";
+    import { User, UserConfig } from "./grpc/vpnaas_pb";
+
     let accessToken = "";
-    let username = "unknown";
+    let username = "";
+    let userPubkey = "";
+    let userConfig: UserConfig;
+
+    interface VPNaaSToken {
+        username: string;
+        exp: number;
+    }
 
     if (localStorage.getItem("accessToken")) {
         accessToken = localStorage.getItem("accessToken");
         username = jwtDecode<VPNaaSToken>(accessToken).username;
     }
 
-    let wireguardConfig = "";
-    let copyText = "copy";
-    let pubkeyBoxLabel = "Enter your public key:";
-    let setPubkeyText = "";
-    let displayConfig = true;
+    async function fetchUserConfig() {
+        const configReq = new ConfusClient("http://127.0.0.1:4448").get_config(
+            new User().setUsername(username),
+            {},
+            (err, config) => {
+                if (err) {
+                    if (err.code === StatusCode.NOT_FOUND) {
+                    } else {
+                        console.error(err);
+                        addError(
+                            "Error fetching Wireguard configuration: " +
+                                err.message
+                        );
+                    }
+                    return;
+                }
+                userConfig = config;
+                userPubkey =
+                    config.getUserPeer().getPubkey()?.getBytes_asB64() || "";
+            }
+        );
+    }
 
-    interface VPNaaSToken {
-        username: string;
-        exp: number;
+    if (username != "") {
+        if (username != "") {
+            onMount(async () => {
+                fetchUserConfig();
+            });
+        }
     }
 </script>
 
@@ -38,22 +70,12 @@
 
 <div class="container">
     <Header />
-    {#if accessToken}
+    {#if username != ""}
         <div class="content">
-            <ConfigBox
-                {wireguardConfig}
-                {copyText}
-                {username}
-                {displayConfig}
-                bind:userPubkey
-            />
-            <PubkeyBox
-                {setPubkeyText}
-                {userPubkey}
-                {pubkeyBoxLabel}
-                {username}
-                {accessToken}
-            />
+            {#if userConfig}
+                <ConfigBox {userConfig} />
+            {/if}
+            <PubkeyBox {userPubkey} {username} {accessToken} {fetchUserConfig} />
         </div>
         <UserInfo {username} />
     {:else}
