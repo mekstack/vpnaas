@@ -7,7 +7,9 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        height: calc(100% - var(--header-height));
+        height: 100%;
+        width: 100%;
+        position: absolute;
     }
 
     .login-button {

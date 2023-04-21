@@ -32,15 +32,15 @@
 </script>
 
 <div class="container">
+    <Header />
     {#if accessToken}
-        <Header />
         <div class="content">
             <ConfigBox {wireguardConfig} {copyText} {username} />
             <PubkeyBox {userPubkey} {pubkeyBoxLabel} {username} {accessToken} />
         </div>
-        <UserInfo {username }/>
+        <UserInfo {username} />
     {:else}
-        <LoginButton />
+    <LoginButton />
     {/if}
 </div>
 
@@ -63,7 +63,7 @@
 
     .container {
         display: flex;
-        justify-content: space-between;
+        /* justify-content: space-between; */
     }
 
     .content {
