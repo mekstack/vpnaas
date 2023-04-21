@@ -4,7 +4,7 @@ use base64::{engine::general_purpose::STANDARD_NO_PAD as base64, Engine as _};
 use std::env;
 use tonic::{Request, Response, Status};
 
-pub struct ConfigGenServer {
+pub struct ConfusServer {
     keys_url: String,
     dns: String,
     server_peer: vpnaas::proto::user_config::ServerPeer,
@@ -14,8 +14,8 @@ fn get_env_var(var_name: &str) -> String {
     env::var(var_name).unwrap_or_else(|_| panic!("Environment variable {} is unset", var_name))
 }
 
-impl ConfigGenServer {
-    pub fn from_env() -> ConfigGenServer {
+impl ConfusServer {
+    pub fn from_env() -> ConfusServer {
         let server_peer = vpnaas::proto::user_config::ServerPeer {
             endpoint: get_env_var("WG_SERVER_ENDPOINT"),
             pubkey: Some(Pubkey {
@@ -34,7 +34,7 @@ impl ConfigGenServer {
                 .collect(),
         };
 
-        ConfigGenServer {
+        ConfusServer {
             keys_url: get_env_var("KEYS_URL"),
             dns: get_env_var("DNS_CONFIG"),
             server_peer,
@@ -53,7 +53,7 @@ impl ConfigGenServer {
 }
 
 #[tonic::async_trait]
-impl vpnaas::proto::confus_server::Confus for ConfigGenServer {
+impl vpnaas::proto::confus_server::Confus for ConfusServer {
     async fn get_config(&self, request: Request<User>) -> Result<Response<UserConfig>, Status> {
         let User { username } = request.into_inner();
 
