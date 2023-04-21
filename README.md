@@ -19,3 +19,11 @@ Wireguard Server that adds peers via gRPC
 ## Test
 
     cargo test -- --test-threads=1
+
+## web
+
+    protoc -I=../proto/ vpnaas.proto \
+        --js_out=import_style=commonjs:./src/grpc \
+        --grpc-web_out=import_style=typescript,mode=grpcweb:./src/grpc
+    npm install
+    npm run dev
