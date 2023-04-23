@@ -8,7 +8,7 @@ use std::time::Duration;
 use tonic::{Request, Response, Status};
 
 const GETSET_IP_SCRIPT: &str = r#"
-local username = KEYS[1]
+local username = ARGV[1]
 
 local ip = redis.call("HGET", "username:to:ip", username)
 
@@ -21,6 +21,21 @@ if not ip then
 end
 
 return ip
+"#;
+
+const SET_PUBKEY_NX_SCRIPT: &str = r#"
+local pubkey = ARGV[1]
+local username = ARGV[2]
+local ip = ARGV[3]
+
+local existing_username = redis.call("HGET", "pubkey:to:username", username)
+
+if not existing_username then
+    redis.call("HSET", "ip:to:pubkey", ip, pubkey)
+    redis.call("HSET", "pubkey:to:username", pubkey, username)
+end
+
+return existing_username
 "#;
 
 pub struct KeysServer {
@@ -49,14 +64,32 @@ impl KeysServer {
             .map_err(|e| Status::from_error(e.into()))
     }
 
-    fn getset_ip(&self, username: String) -> Result<u32, Status> {
+    fn getset_ip(&self, username: &String) -> Result<u32, Status> {
         let mut c = self.redis()?;
 
         redis::Script::new(&GETSET_IP_SCRIPT)
-            .key(&username)
+            .arg(username)
             .invoke::<Option<u32>>(&mut c)
             .map_err(|e| Status::from_error(e.into()))?
             .ok_or(Status::resource_exhausted("No IPs left in pool"))
+    }
+
+    fn set_pubkey_nx(&self, pubkey: &[u8; 32], username: &String, ip: u32) -> Result<(), Status> {
+        let mut c = self.redis()?;
+
+        let existing_username = redis::Script::new(&SET_PUBKEY_NX_SCRIPT)
+            .arg(pubkey)
+            .arg(username)
+            .arg(ip)
+            .invoke::<Option<String>>(&mut c)
+            .map_err(|e| Status::from_error(e.into()))?;
+
+        if let Some(existing_username) = existing_username {
+            if username != &existing_username {
+                return Err(Status::already_exists("Public key is already in use"));
+            }
+        }
+        Ok(())
     }
 
     async fn wg_server_client(
@@ -78,11 +111,8 @@ impl vpnaas::proto::keys_server::Keys for KeysServer {
         let (username, pubkey): (String, [u8; 32]) = inner.try_into()?;
         self.jwt.validate(&username, &metadata)?;
 
-        let ip: u32 = self.getset_ip(username)?;
-
-        self.redis()?
-            .hset("ip:to:pubkey", &ip, &pubkey)
-            .map_err(|e| Status::from_error(e.into()))?;
+        let ip: u32 = self.getset_ip(&username)?;
+        self.set_pubkey_nx(&pubkey, &username, ip)?;
 
         self.wg_server_client()
             .await?
@@ -129,10 +159,10 @@ impl vpnaas::proto::keys_server::Keys for KeysServer {
             .into_iter()
             .filter(|(ip, pubkey)| {
                 if *ip == 0 {
-                    println!("Got undefined ip. Skipping...");
+                    log::warn!("Got undefined ip. Skipping...");
                     false
                 } else if pubkey.len() != 32 {
-                    println!("Got bad pubkey for ip {}. Skipping...", Ipv4Addr::from(*ip));
+                    log::warn!("Got bad pubkey for ip {}. Skipping...", Ipv4Addr::from(*ip));
                     false
                 } else {
                     true
