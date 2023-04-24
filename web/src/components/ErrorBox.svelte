@@ -16,11 +16,12 @@
 
 <style>
     .error-box {
-        background-color: rgba(255, 0, 0, 0.9);
-        color: white;
-        padding: 1em;
+        background-color: black;
+        color: #ff0033;
+        padding: 0 1em;
         margin-bottom: 1em;
-        border-radius: 4px;
+        border: 1px solid rgb(48, 52, 54);
+        font-family: monospace;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 </style>
