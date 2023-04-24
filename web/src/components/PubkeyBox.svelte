@@ -12,7 +12,6 @@
     let pubkeyBoxLabel = "";
     let pubkeyIsNew = !!userPubkey;
 
-    // Watch for changes in userPubkey
     $: {
         if (pubkeyIsNew) {
             setPubkeyText = "set";
@@ -23,9 +22,25 @@
         }
     }
 
+    function isValidBase64(str) {
+        try {
+            window.atob(str);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
     async function setPubkey() {
+        if (!isValidBase64(userPubkey)) {
+            addError(
+                "Invalid base64 string"
+            );
+            return;
+        }
+
         // Decode the base64-encoded string and convert it to a Uint8Array
-        const decodedKey = atob(userPubkey);
+        const decodedKey = window.atob(userPubkey);
         const keyBytes = new Uint8Array(decodedKey.length);
         for (let i = 0; i < decodedKey.length; i++) {
             keyBytes[i] = decodedKey.charCodeAt(i);
@@ -45,7 +60,6 @@
                 setPubkeyText = "set!";
                 pubkeyBoxLabel = "Your public key:";
                 pubkeyIsNew = false;
-                // dispatch event to load config
                 fetchUserConfig();
             }
         );
@@ -75,6 +89,11 @@
 </div>
 
 <style>
+    ::selection {
+        background: lightgray;
+        color: black;
+    }
+
     .pubkey-box {
         display: block;
         width: 100%;

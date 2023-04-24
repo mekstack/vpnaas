@@ -67,6 +67,11 @@ Endpoint = ${endpoint}
 {/if}
 
 <style>
+    ::selection {
+        background: lightgray;
+        color: black;
+    }
+
     .config-box {
         display: block;
         width: 100%;
