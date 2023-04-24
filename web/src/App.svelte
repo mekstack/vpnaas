@@ -75,7 +75,12 @@
             {#if userConfig}
                 <ConfigBox {userConfig} />
             {/if}
-            <PubkeyBox {userPubkey} {username} {accessToken} {fetchUserConfig} />
+            <PubkeyBox
+                {userPubkey}
+                {username}
+                {accessToken}
+                {fetchUserConfig}
+            />
         </div>
         <UserInfo {username} />
     {:else}
@@ -92,6 +97,7 @@
         font-family: monospace;
         height: 100vh;
         margin: 0;
+        overflow: hidden;
     }
 
     ::selection {
@@ -109,7 +115,7 @@
     .content {
         flex-basis: 60%;
         max-width: 600px;
-        margin-top: 4%; /* Adjust the margin as needed */
+        margin-top: 4%;
     }
 
     .error-container {
