@@ -98,7 +98,6 @@ Endpoint = ${endpoint}
     }
 
     .config-box:focus {
-        outline: none;
         box-shadow: none;
     }
 

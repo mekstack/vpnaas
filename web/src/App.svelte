@@ -117,6 +117,8 @@
         left: 50%;
         min-width: 600px;
         transform: translate(-50%, -50%);
+        justify-content: center;
+        display: flex;
     }
 
     .username {
@@ -125,7 +127,6 @@
         right: 0;
         display: flex;
         flex-direction: column;
-        align-items: left;
         padding: 1em 2em;
     }
 
@@ -135,7 +136,6 @@
         left: 0;
         display: flex;
         flex-direction: column;
-        align-items: left;
         padding: 1em 2em;
     }
 
@@ -149,7 +149,6 @@
     .link {
         color: limegreen;
         font-family: monospace;
-        font-size: em;
         text-decoration: none;
     }
 
