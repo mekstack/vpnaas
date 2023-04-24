@@ -14,3 +14,7 @@ tonic-web = "0.9.2"
 
 [build-dependencies]
 tonic-build = "0.9.2"
+
+[profile.release]
+codegen-units = 1
+lto = true

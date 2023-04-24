@@ -22,3 +22,7 @@ tonic-build = "0.9.1"
 [dev-dependencies]
 tokio = { version = "1.27.0", features = ["sync"] }
 tokio-stream = { version = "0.1.12", features = ["net"] }
+
+[profile.release]
+codegen-units = 1
+lto = true

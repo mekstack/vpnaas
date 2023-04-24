@@ -18,3 +18,7 @@ tonic = "0.9.1"
 
 [build-dependencies]
 tonic-build = "0.9.1"
+
+[profile.release]
+codegen-units = 1
+lto = true
