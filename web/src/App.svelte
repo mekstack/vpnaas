@@ -1,9 +1,6 @@
 <script lang="ts">
-    import Header from "./components/Header.svelte";
-    import UserInfo from "./components/UserInfo.svelte";
     import ConfigBox from "./components/ConfigBox.svelte";
     import PubkeyBox from "./components/PubkeyBox.svelte";
-    import LoginButton from "./components/LoginButton.svelte";
     import ErrorBox from "./components/ErrorBox.svelte";
     import errorStore from "./stores/errorStore";
     import { addError } from "./stores/errorStore";
@@ -69,9 +66,18 @@
 </div>
 
 <div class="container">
-    <Header />
-    {#if username != ""}
-        <div class="content">
+    <div class="header">
+        <h1>VPNaaS</h1>
+        <a href="https://github.com/mekstack/vpnaas" class="link">github</a>
+        <a href="https://docs.mekstack.ru" class="link">docs</a>
+    </div>
+
+    <div class="username">
+        <h1>{username}</h1>
+    </div>
+
+    <div class="content">
+        {#if username != ""}
             {#if userConfig}
                 <ConfigBox {userConfig} />
             {/if}
@@ -81,11 +87,12 @@
                 {accessToken}
                 {fetchUserConfig}
             />
-        </div>
-        <UserInfo {username} />
-    {:else}
-        <LoginButton />
-    {/if}
+        {:else}
+            <div class="login-container">
+                <a class="login-button" href="/login">Log In</a>
+            </div>
+        {/if}
+    </div>
 </div>
 
 <style>
@@ -95,9 +102,6 @@
         background-color: black;
         color: lightgray;
         font-family: monospace;
-        height: 100vh;
-        margin: 0;
-        overflow: hidden;
     }
 
     ::selection {
@@ -107,15 +111,32 @@
 
     /* Container Styles */
 
-    .container {
-        display: flex;
-        justify-content: space-between;
+    .content {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        min-width: 600px;
+        transform: translate(-50%, -50%);
     }
 
-    .content {
-        flex-basis: 60%;
-        max-width: 600px;
-        margin-top: 4%;
+    .username {
+        position: absolute;
+        top: 0;
+        right: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: left;
+        padding: 1em 2em;
+    }
+
+    .header {
+        position: absolute;
+        top: 0;
+        left: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: left;
+        padding: 1em 2em;
     }
 
     .error-container {
@@ -123,5 +144,29 @@
         top: 1em;
         right: 1em;
         z-index: 1000;
+    }
+
+    .link {
+        color: limegreen;
+        font-family: monospace;
+        font-size: em;
+        text-decoration: none;
+    }
+
+    .link:hover {
+        color: white;
+    }
+
+    .login-button {
+        background: none;
+        border: none;
+        color: limegreen;
+        font-family: monospace;
+        font-size: 2em;
+        cursor: pointer;
+    }
+
+    .login-button:hover {
+        color: white;
     }
 </style>
