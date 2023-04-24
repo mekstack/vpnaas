@@ -8,13 +8,21 @@
     import { KeysClient } from "../grpc/VpnaasServiceClientPb";
     import { User, UserPubkey, Pubkey } from "../grpc/vpnaas_pb";
 
-    let setPubkeyText = "set";
+    let setPubkeyText = "";
+    let pubkeyBoxLabel = "";
+    let pubkeyIsNew = !!userPubkey;
 
-    let pubkeyBoxLabel = "Enter your public key:";
-
-    if (userPubkey) {
-        pubkeyBoxLabel = "Your public key:";
+    // Watch for changes in userPubkey
+    $: {
+        if (pubkeyIsNew) {
+            setPubkeyText = "set";
+            pubkeyBoxLabel = "Enter your public key:";
+        } else {
+            setPubkeyText = "set!";
+            pubkeyBoxLabel = "Your public key:";
+        }
     }
+
     async function setPubkey() {
         // Decode the base64-encoded string and convert it to a Uint8Array
         const decodedKey = atob(userPubkey);
@@ -36,6 +44,7 @@
                 }
                 setPubkeyText = "set!";
                 pubkeyBoxLabel = "Your public key:";
+                pubkeyIsNew = false;
                 // dispatch event to load config
                 fetchUserConfig();
             }
@@ -52,7 +61,10 @@
         type="text"
         class="pubkey-box"
         value={userPubkey}
-        on:input={(e) => (userPubkey = e.target.value)}
+        on:input={(e) => {
+            pubkeyIsNew = true;
+            userPubkey = e.target.value;
+        }}
         on:keydown={(e) => {
             if (e.key === "Enter") {
                 setPubkey();
