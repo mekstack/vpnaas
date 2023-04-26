@@ -1,0 +1,76 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: vpnaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+      - name: web
+        image: mekstack/vpnaas-web:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: vpnaas
+spec:
+  selector:
+    app: web
+  ports:
+  - protocol: TCP
+    port: 80
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: vpnaas
+  namespace: vpnaas
+spec:
+  tls:
+  - hosts:
+    - vpnaas.mekstack.ru
+    secretName: vpnaas-tls
+  rules:
+  - host: vpnaas.mekstack.ru
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: web
+            port:
+              number: 80
+      - path: /vpnaas.Confus
+        pathType: Prefix
+        backend:
+          service:
+            name: confus
+            port:
+              number: 80
+      - path: /vpnaas.Keys
+        pathType: Prefix
+        backend:
+          service:
+            name: keys
+            port:
+              number: 80
+      - path: /vpnaas.Wg
+        pathType: Prefix
+        backend:
+          service:
+            name: wg
+            port:
+              number: 80

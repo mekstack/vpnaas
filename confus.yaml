@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: confus
+  namespace: vpnaas
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: confus
+  template:
+    metadata:
+      labels:
+        app: confus
+    spec:
+      containers:
+      - name: confus
+        image: mekstack/confus:latest
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 80
+        env:
+        - name: RUST_LOG
+          value: info
+        - name: WG_SERVER_ENDPOINT
+          value: wg.mekstack.ru:6969
+        - name: WG_SERVER_PUBKEY
+          value: mZjqLnMXtQUpPLu1ntq2PgrG75HDarhvywvmT7M9gQo
+        - name: ALLOWED_IPS
+          value: 0.0.0.0/0
+        - name: DNS_CONFIG
+          value: 8.8.8.8
+        - name: KEYS_URL
+          value: http://keys
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: confus
+  namespace: vpnaas
+spec:
+  selector:
+    app: confus
+  ports:
+  - protocol: TCP
+    port: 80
