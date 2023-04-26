@@ -67,11 +67,6 @@ Endpoint = ${endpoint}
 {/if}
 
 <style>
-    ::selection {
-        background: lightgray;
-        color: black;
-    }
-
     .config-box {
         display: block;
         width: 100%;
@@ -94,7 +89,6 @@ Endpoint = ${endpoint}
         display: block;
         font-weight: bold;
         font-size: 1.5em;
-        margin: 0.3em 0;
     }
 
     .config-box:focus {
@@ -103,6 +97,7 @@ Endpoint = ${endpoint}
 
     .config-container {
         position: relative;
+        width: 100%;
         margin: 1em 0;
     }
 

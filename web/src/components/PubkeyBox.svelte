@@ -10,7 +10,7 @@
 
     let setPubkeyText = "";
     let pubkeyBoxLabel = "";
-    let pubkeyIsNew = !!userPubkey;
+    let pubkeyIsNew = !userPubkey;
 
     $: {
         if (pubkeyIsNew) {
@@ -33,9 +33,7 @@
 
     async function setPubkey() {
         if (!isValidBase64(userPubkey)) {
-            addError(
-                "Invalid base64 string"
-            );
+            addError("Invalid base64 string");
             return;
         }
 
@@ -46,7 +44,9 @@
             keyBytes[i] = decodedKey.charCodeAt(i);
         }
 
-        const setPubkeyReq = new KeysClient("http://127.0.0.1:3000").set_pubkey(
+        const setPubkeyReq = new KeysClient(
+            "https://vpnaas.mekstack.ru"
+        ).set_pubkey(
             new UserPubkey()
                 .setUser(new User().setUsername(username))
                 .setPubkey(new Pubkey().setBytes(keyBytes)),
@@ -67,8 +67,8 @@
 </script>
 
 <div class="pubkey-container">
-    <label class="pubkey-label">{pubkeyBoxLabel}</label>
     <div class="set-container">
+        <label class="pubkey-label">{pubkeyBoxLabel}</label>
         <button class="set-button" on:click={setPubkey}>{setPubkeyText}</button>
     </div>
     <input
@@ -84,23 +84,17 @@
                 setPubkey();
             }
         }}
-        placeholder="Enter your base64 encoded public key"
+        placeholder="wg genkey | tee priv.key | wg pubkey"
     />
 </div>
 
 <style>
-    ::selection {
-        background: lightgray;
-        color: black;
-    }
-
     .pubkey-box {
         display: block;
         width: 100%;
         padding: 0.5em 1em;
         border: 1px solid rgb(48, 52, 54);
         font-family: monospace;
-        height: 100%;
         color: lightgray;
         background-color: black;
         resize: none;
@@ -108,7 +102,7 @@
     }
 
     .pubkey-container {
-        margin: 2em 0;
+        width: 100%;
         position: relative;
     }
 
@@ -116,16 +110,17 @@
         display: block;
         font-weight: bold;
         font-size: 1.5em;
-        margin: 0.3em 0;
     }
 
     .set-container {
-        position: absolute;
-        top: 0;
-        right: 0;
+        display: flex;
+        justify-content: space-between;
+        padding: 0.3em 0;
     }
 
     .set-button {
+        padding: 0;
+        margin: 0;
         background: none;
         border: none;
         color: limegreen;

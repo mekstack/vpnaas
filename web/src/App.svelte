@@ -22,40 +22,59 @@
         exp: number;
     }
 
+    checkForAccessTokenInHash();
+
     if (localStorage.getItem("accessToken")) {
         accessToken = localStorage.getItem("accessToken");
         username = jwtDecode<VPNaaSToken>(accessToken).username;
     }
 
-    async function fetchUserConfig() {
-        const configReq = new ConfusClient("http://127.0.0.1:4448").get_config(
-            new User().setUsername(username),
-            {},
-            (err, config) => {
-                if (err) {
-                    if (err.code === StatusCode.NOT_FOUND) {
-                    } else {
-                        console.error(err);
-                        addError(
-                            "Error fetching Wireguard configuration: " +
-                                err.message
-                        );
-                    }
-                    return;
-                }
-                userConfig = config;
-                userPubkey =
-                    config.getUserPeer().getPubkey()?.getBytes_asB64() || "";
-            }
+    function checkForAccessTokenInHash() {
+        const hashParams = new URLSearchParams(
+            window.location.hash.substring(1)
         );
+
+        if (hashParams.has("access_token")) {
+            const accessToken = hashParams.get("access_token");
+            localStorage.setItem("accessToken", accessToken);
+
+            // Remove access_token from the hash fragment
+            const newHashParams = new URLSearchParams(hashParams);
+            newHashParams.delete("access_token");
+            window.location.hash = newHashParams.toString();
+        }
+    }
+
+    async function fetchUserConfig() {
+        const configReq = new ConfusClient(
+            "https://vpnaas.mekstack.ru"
+        ).get_config(new User().setUsername(username), {}, (err, config) => {
+            if (err) {
+                if (err.code === StatusCode.NOT_FOUND) {
+                } else {
+                    console.error(err);
+                    addError(
+                        "Error fetching Wireguard configuration: " + err.message
+                    );
+                }
+                return;
+            }
+            userConfig = config;
+            userPubkey =
+                config.getUserPeer().getPubkey()?.getBytes_asB64() || "";
+        });
     }
 
     if (username != "") {
-        if (username != "") {
-            onMount(async () => {
-                fetchUserConfig();
-            });
-        }
+        onMount(async () => {
+            fetchUserConfig();
+        });
+    }
+
+    async function login() {
+        const redirectBackUrl = encodeURIComponent(window.location.href);
+        const authUrl = `https://auth.mekstack.ru/login?redirect_back_url=${redirectBackUrl}`;
+        window.location.href = authUrl;
     }
 </script>
 
@@ -89,7 +108,7 @@
             />
         {:else}
             <div class="login-container">
-                <a class="login-button" href="/login">Log In</a>
+                <button class="login-button" on:click={login}>Log In</button>
             </div>
         {/if}
     </div>
@@ -117,6 +136,12 @@
         left: 50%;
         min-width: 600px;
         transform: translate(-50%, -50%);
+        justify-content: center;
+        flex-direction: column;
+        display: flex;
+    }
+
+    .login-container {
         justify-content: center;
         display: flex;
     }
