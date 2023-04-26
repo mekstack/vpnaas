@@ -1,25 +1,23 @@
-use std::env;
-
-use base64::{engine::general_purpose::STANDARD_NO_PAD as base64, Engine as _};
-use tonic::transport::Server;
-
+mod config;
 mod server;
 mod vpnaas;
 mod wg;
 
+use tonic::transport::Server;
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let privkey = base64
-        .decode(env::var("WG_SERVER_PRIVKEY").expect("WG_SERVER_PRIVKEY variable is unset"))?
-        .try_into()
-        .expect("Invalid private key length");
+    env_logger::init();
 
-    let addr = "0.0.0.0:4242".parse()?;
-    let wg_server = server::WgServer::new(privkey).await;
+    let config = config::Config::from_env();
+    let server_url = format!("0.0.0.0:{}", config.server_port).parse()?;
+    let wg_server = server::WgServer::new(config).await;
+
+    log::info!("Starting wg server on {}", server_url);
 
     Server::builder()
         .add_service(vpnaas::WgServer::new(wg_server))
-        .serve(addr)
+        .serve(server_url)
         .await?;
 
     Ok(())

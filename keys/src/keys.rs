@@ -1,6 +1,7 @@
 use crate::vpnaas;
 use crate::vpnaas::proto::{Empty, Peer, Peers, Pubkey, Success, User, UserPubkey};
 
+use crate::config;
 use crate::jwt;
 use redis::Commands;
 use std::net::Ipv4Addr;
@@ -41,20 +42,23 @@ return existing_username
 pub struct KeysServer {
     redis_connection_pool: r2d2::Pool<redis::Client>,
     jwt: jwt::JwtValidator,
+    wg_server_url: String,
 }
 
 impl KeysServer {
-    pub fn new(jwt: jwt::JwtValidator) -> KeysServer {
-        let client = redis::Client::open("redis://127.0.0.1/").unwrap();
-        let pool = r2d2::Pool::builder()
+    pub fn new(config: config::Config, jwt: jwt::JwtValidator) -> KeysServer {
+        let client = redis::Client::open(config.redis_url).unwrap();
+        let redis_connection_pool = r2d2::Pool::builder()
             .connection_timeout(Duration::from_secs(1))
             .max_size(15)
             .build(client)
             .unwrap();
+        let wg_server_url = config.wg_server_url;
 
         KeysServer {
-            redis_connection_pool: pool,
+            redis_connection_pool,
             jwt,
+            wg_server_url,
         }
     }
 
@@ -95,10 +99,11 @@ impl KeysServer {
     async fn wg_server_client(
         &self,
     ) -> Result<vpnaas::WgClient<tonic::transport::Channel>, Status> {
-        let channel = tonic::transport::Channel::from_static("http://127.0.0.1:4242")
+        let channel = tonic::transport::Channel::from_shared(self.wg_server_url.to_string())
+            .map_err(|e| Status::unavailable(format!("Invalid wg uri: {}", e)))?
             .connect()
             .await
-            .map_err(|_| Status::unavailable("Connection to Wireguard Server failed"))?;
+            .map_err(|e| Status::unavailable(format!("Connection to Wg server failed: {}", e)))?;
 
         Ok(vpnaas::WgClient::new(channel))
     }

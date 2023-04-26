@@ -1,3 +1,4 @@
+mod config;
 mod confus;
 mod vpnaas;
 
@@ -7,8 +8,9 @@ use tonic::transport::Server;
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    let server_url = "0.0.0.0:4448".parse()?;
-    let confus_server = vpnaas::ConfusServer::new(confus::ConfusServer::from_env());
+    let config = config::Config::from_env();
+    let server_url = format!("0.0.0.0:{}", config.server_port).parse()?;
+    let confus_server = vpnaas::ConfusServer::new(confus::ConfusServer::from_config(config));
 
     log::info!("Starting confus server on {}", server_url);
 

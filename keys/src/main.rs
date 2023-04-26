@@ -1,22 +1,22 @@
+mod config;
 mod jwt;
 mod keys;
 mod tests;
 mod vpnaas;
 
-use std::env;
 use tonic::transport::Server;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    let server_url = "0.0.0.0:3000".parse()?;
+    let config = config::Config::from_env();
+    let jwt = jwt::JwtValidator::new(config.jwt_secret_key.clone());
 
-    let jwt_secret_key = env::var("JWT_SECRET_KEY").expect("JWT_SECRET_KEY variable is unset");
-    let jwt = jwt::JwtValidator::new(jwt_secret_key);
-    let keys_server = vpnaas::KeysServer::new(keys::KeysServer::new(jwt));
+    let server_url = format!("0.0.0.0:{}", config.server_port).parse()?;
+    let keys_server = vpnaas::KeysServer::new(keys::KeysServer::new(config, jwt));
 
-    log::info!("Starting keys confus server on {}", server_url);
+    log::info!("Starting keys server on {}", server_url);
 
     Server::builder()
         .accept_http1(true)

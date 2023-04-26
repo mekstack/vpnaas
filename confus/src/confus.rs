@@ -1,48 +1,39 @@
+use crate::config::Config;
 use crate::vpnaas;
 use crate::vpnaas::proto::{Pubkey, User, UserConfig};
 use base64::{engine::general_purpose::STANDARD_NO_PAD as base64, Engine as _};
-use std::env;
+use std::convert::TryFrom;
 use tonic::{Request, Response, Status};
 
 pub struct ConfusServer {
-    keys_url: String,
-    dns: String,
+    config: Config,
     server_peer: vpnaas::proto::user_config::ServerPeer,
 }
 
-fn get_env_var(var_name: &str) -> String {
-    env::var(var_name).unwrap_or_else(|_| panic!("Environment variable {} is unset", var_name))
-}
-
 impl ConfusServer {
-    pub fn from_env() -> ConfusServer {
+    pub fn from_config(config: Config) -> ConfusServer {
         let server_peer = vpnaas::proto::user_config::ServerPeer {
-            endpoint: get_env_var("WG_SERVER_ENDPOINT"),
+            endpoint: config.wg_server_endpoint.clone(),
             pubkey: Some(Pubkey {
                 bytes: <[u8; 32]>::try_from(
                     base64
-                        .decode(get_env_var("WG_SERVER_PUBKEY"))
+                        .decode(config.wg_server_pubkey.clone())
                         .expect("WG_SERVER_PUBKEY decode failed"),
                 )
                 .expect("Invalid private key length")
                 .to_vec(),
             }),
-
-            allowed_ips: get_env_var("ALLOWED_IPS")
-                .split_whitespace()
-                .map(|s| s.to_owned())
-                .collect(),
+            allowed_ips: config.allowed_ips.clone(),
         };
 
         ConfusServer {
-            keys_url: get_env_var("KEYS_URL"),
-            dns: get_env_var("DNS_CONFIG"),
+            config,
             server_peer,
         }
     }
 
     async fn keys_client(&self) -> Result<vpnaas::KeysClient<tonic::transport::Channel>, Status> {
-        let channel = tonic::transport::Channel::from_shared(self.keys_url.clone().into_bytes())
+        let channel = tonic::transport::Channel::from_shared(self.config.keys_url.to_string())
             .map_err(|_| Status::unavailable("Invalid keys service url"))?
             .connect()
             .await
@@ -69,7 +60,7 @@ impl vpnaas::proto::confus_server::Confus for ConfusServer {
         let config = UserConfig {
             user_peer: Some(user_peer),
             server_peer: Some(self.server_peer.clone()),
-            dns: self.dns.clone(),
+            dns: self.config.dns_config.clone(),
         };
 
         log::info!("Sent config for user '{}'", username);

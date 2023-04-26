@@ -104,7 +104,6 @@ async fn set_device(device_attributes: Vec<WgDeviceAttrs>) -> Result<(), BoxedEr
 
     let mut res = handle.request(nlmsg).await?;
     while let Some(rx_packet) = res.next().await {
-        println!("SUSSY BAKA");
         match rx_packet?.payload {
             NetlinkPayload::Error(e) => return Err(e.to_string().into()),
             _ => (),
