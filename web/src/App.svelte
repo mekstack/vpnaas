@@ -1,32 +1,16 @@
 <script lang="ts">
-    import ConfigBox from "./components/ConfigBox.svelte";
-    import PubkeyBox from "./components/PubkeyBox.svelte";
+    import Content from "./components/Content.svelte";
     import ErrorBox from "./components/ErrorBox.svelte";
     import errorStore from "./stores/errorStore";
-    import { addError } from "./stores/errorStore";
 
     import jwtDecode from "jwt-decode";
-    import { onMount } from "svelte";
-    import { StatusCode } from "grpc-web";
 
-    import { ConfusClient } from "./grpc/VpnaasServiceClientPb";
-    import { User, UserConfig } from "./grpc/vpnaas_pb";
-
-    let accessToken = "";
-    let username = "";
-    let userPubkey = "";
-    let userConfig: UserConfig;
+    let accessToken: string;
+    let username: string;
 
     interface VPNaaSToken {
         username: string;
         exp: number;
-    }
-
-    checkForAccessTokenInHash();
-
-    if (localStorage.getItem("accessToken")) {
-        accessToken = localStorage.getItem("accessToken");
-        username = jwtDecode<VPNaaSToken>(accessToken).username;
     }
 
     function checkForAccessTokenInHash() {
@@ -35,7 +19,7 @@
         );
 
         if (hashParams.has("access_token")) {
-            const accessToken = hashParams.get("access_token");
+            accessToken = hashParams.get("access_token");
             localStorage.setItem("accessToken", accessToken);
 
             // Remove access_token from the hash fragment
@@ -44,31 +28,11 @@
             window.location.hash = newHashParams.toString();
         }
     }
+    checkForAccessTokenInHash();
 
-    async function fetchUserConfig() {
-        const configReq = new ConfusClient(
-            "https://vpnaas.mekstack.ru"
-        ).get_config(new User().setUsername(username), {}, (err, config) => {
-            if (err) {
-                if (err.code === StatusCode.NOT_FOUND) {
-                } else {
-                    console.error(err);
-                    addError(
-                        "Error fetching Wireguard configuration: " + err.message
-                    );
-                }
-                return;
-            }
-            userConfig = config;
-            userPubkey =
-                config.getUserPeer().getPubkey()?.getBytes_asB64() || "";
-        });
-    }
-
-    if (username != "") {
-        onMount(async () => {
-            fetchUserConfig();
-        });
+    if (localStorage.getItem("accessToken")) {
+        accessToken = localStorage.getItem("accessToken");
+        username = jwtDecode<VPNaaSToken>(accessToken).username;
     }
 
     async function login() {
@@ -91,44 +55,27 @@
         <a href="https://docs.mekstack.ru" class="link">docs</a>
     </div>
 
-    <div class="username">
-        <h1>{username}</h1>
-    </div>
+    {#if username}
+        <div class="username">
+            <h1>{username}</h1>
+        </div>
+    {/if}
 
     <div class="content">
-        {#if username != ""}
-            {#if userConfig}
-                <ConfigBox {userConfig} />
-            {/if}
-            <PubkeyBox
-                {userPubkey}
-                {username}
-                {accessToken}
-                {fetchUserConfig}
-            />
+        {#if username}
+            <Content {username} {accessToken} />
         {:else}
-            <div class="login-container">
-                <button class="login-button" on:click={login}>Log In</button>
-            </div>
+            <button class="login-button" on:click={login}>Log In</button>
         {/if}
     </div>
 </div>
 
 <style>
-    /* General Styles */
-
     :global(body) {
         background-color: black;
         color: lightgray;
         font-family: monospace;
     }
-
-    ::selection {
-        background: lightgray;
-        color: black;
-    }
-
-    /* Container Styles */
 
     .content {
         position: absolute;
@@ -137,60 +84,56 @@
         min-width: 600px;
         transform: translate(-50%, -50%);
         justify-content: center;
+        align-items: center;
         flex-direction: column;
         display: flex;
     }
 
-    .login-container {
-        justify-content: center;
-        display: flex;
-    }
-
+    .header,
     .username {
         position: absolute;
         top: 0;
-        right: 0;
         display: flex;
         flex-direction: column;
         padding: 1em 2em;
     }
 
     .header {
-        position: absolute;
-        top: 0;
         left: 0;
-        display: flex;
-        flex-direction: column;
-        padding: 1em 2em;
+    }
+    .username {
+        right: 0;
     }
 
     .error-container {
         position: fixed;
-        top: 1em;
-        right: 1em;
+        top: 1.5em;
+        right: 1.5em;
         z-index: 1000;
     }
 
-    .link {
+    .link,
+    .login-button {
         color: limegreen;
         font-family: monospace;
         text-decoration: none;
     }
 
-    .link:hover {
+    .link:hover,
+    .login-button:hover {
         color: white;
+    }
+
+    .login-button:active {
+        color: white;
+        background: none;
     }
 
     .login-button {
         background: none;
         border: none;
-        color: limegreen;
-        font-family: monospace;
         font-size: 2em;
         cursor: pointer;
-    }
-
-    .login-button:hover {
-        color: white;
+        width: fit-content;
     }
 </style>
