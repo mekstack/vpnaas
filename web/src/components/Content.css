@@ -1,0 +1,57 @@
+.config-box,
+.pubkey-box {
+    display: block;
+    width: 100%;
+    padding: 0.5em 1em;
+    border: 1px solid rgb(48, 52, 54);
+    font-family: monospace;
+    color: lightgray;
+    background-color: black;
+    resize: none;
+    border-radius: 0;
+    outline: none;
+}
+
+.config-box {
+    min-height: 200px;
+}
+
+.config-container,
+.pubkey-container {
+    width: 100%;
+    position: relative;
+    margin: 0.5em 0;
+}
+
+.config-label,
+.pubkey-label {
+    display: block;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+.title-container {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.3em 0;
+}
+
+.button {
+    padding: 0 2px;
+    margin: 0;
+    background: none;
+    border: none;
+    border-radius: 0;
+    color: limegreen;
+    font-family: monospace;
+    cursor: pointer;
+}
+
+.button:hover {
+    color: white;
+}
+
+.button:active {
+    color: black;
+    background-color: limegreen;
+}
