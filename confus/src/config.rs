@@ -1,26 +1,26 @@
 use std::env;
 
 pub struct Config {
-    pub server_port: String,
-    pub wg_server_endpoint: String,
-    pub wg_server_pubkey: String,
-    pub allowed_ips: Vec<String>,
-    pub keys_url: String,
-    pub dns_config: String,
+    pub grpc_port: String,
+    pub config_endpoint: String,
+    pub config_pubkey: String,
+    pub config_allowed_ips: Vec<String>,
+    pub gprc_keys_url: String,
+    pub config_dns: String,
 }
 
 impl Config {
     pub fn from_env() -> Config {
         Config {
-            server_port: get_env_var_or_default("PORT", "80"),
-            wg_server_endpoint: get_env_var("WG_SERVER_ENDPOINT"),
-            wg_server_pubkey: get_env_var("WG_SERVER_PUBKEY"),
-            allowed_ips: get_env_var("ALLOWED_IPS")
+            grpc_port: get_env_var_or_default("VPNAAS_GRPC_PORT", "80"),
+            gprc_keys_url: get_env_var_or_default("VPNAAS_GRPC_KEYS_URL", "http://keys:80"),
+            config_endpoint: get_env_var("VPNAAS_CONFIG_ENDPOINT"),
+            config_pubkey: get_env_var("VPNAAS_CONFIG_PUBKEY"),
+            config_dns: get_env_var("VPNAAS_CONFIG_DNS"),
+            config_allowed_ips: get_env_var("VPNAAS_CONFIG_ALLOWED_IPS")
                 .split_whitespace()
                 .map(|s| s.to_owned())
                 .collect(),
-            dns_config: get_env_var("DNS_CONFIG"),
-            keys_url: get_env_var("KEYS_URL"),
         }
     }
 }

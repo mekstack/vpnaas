@@ -22,16 +22,14 @@ spec:
         env:
         - name: RUST_LOG
           value: info
-        - name: WG_SERVER_ENDPOINT
-          value: wg.mekstack.ru:6969
-        - name: WG_SERVER_PUBKEY
+        - name: VPNAAS_CONFIG_ENDPOINT
+          value: wg.mekstack.ru
+        - name: VPNAAS_CONFIG_PUBKEY
           value: mZjqLnMXtQUpPLu1ntq2PgrG75HDarhvywvmT7M9gQo
-        - name: ALLOWED_IPS
+        - name: VPNAAS_CONFIG_ALLOWED_IPS
           value: 0.0.0.0/0
-        - name: DNS_CONFIG
+        - name: VPNAAS_CONFIG_DNS
           value: 8.8.8.8
-        - name: KEYS_URL
-          value: http://keys
 ---
 apiVersion: v1
 kind: Service

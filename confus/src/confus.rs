@@ -13,17 +13,17 @@ pub struct ConfusServer {
 impl ConfusServer {
     pub fn from_config(config: Config) -> ConfusServer {
         let server_peer = vpnaas::proto::user_config::ServerPeer {
-            endpoint: config.wg_server_endpoint.clone(),
+            endpoint: config.config_endpoint.clone(),
             pubkey: Some(Pubkey {
                 bytes: <[u8; 32]>::try_from(
                     base64
-                        .decode(config.wg_server_pubkey.clone())
+                        .decode(config.config_pubkey.clone())
                         .expect("WG_SERVER_PUBKEY decode failed"),
                 )
                 .expect("Invalid private key length")
                 .to_vec(),
             }),
-            allowed_ips: config.allowed_ips.clone(),
+            allowed_ips: config.config_allowed_ips.clone(),
         };
 
         ConfusServer {
@@ -33,7 +33,7 @@ impl ConfusServer {
     }
 
     async fn keys_client(&self) -> Result<vpnaas::KeysClient<tonic::transport::Channel>, Status> {
-        let channel = tonic::transport::Channel::from_shared(self.config.keys_url.to_string())
+        let channel = tonic::transport::Channel::from_shared(self.config.gprc_keys_url.to_string())
             .map_err(|_| Status::unavailable("Invalid keys service url"))?
             .connect()
             .await
@@ -60,7 +60,7 @@ impl vpnaas::proto::confus_server::Confus for ConfusServer {
         let config = UserConfig {
             user_peer: Some(user_peer),
             server_peer: Some(self.server_peer.clone()),
-            dns: self.config.dns_config.clone(),
+            dns: self.config.config_dns.clone(),
         };
 
         log::info!("Sent config for user '{}'", username);

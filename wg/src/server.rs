@@ -22,7 +22,7 @@ async fn keys_client(url: String) -> vpnaas::KeysClient<tonic::transport::Channe
 
 impl WgServer {
     pub async fn new(config: Config) -> WgServer {
-        let mut client = keys_client(config.keys_client_url).await;
+        let mut client = keys_client(config.grpc_keys_url).await;
 
         let peers = client
             .get_all_peers(Empty::default())
@@ -36,8 +36,12 @@ impl WgServer {
             .filter_map(|p| p.try_into().ok())
             .collect();
 
-        let mut device =
-            WgDevice::new(&config.iface_name, config.iface_port, config.private_key).await;
+        let mut device = WgDevice::new(
+            &config.wgdevice_interface_name,
+            config.wgdevice_interface_port,
+            config.wgdevice_privkey,
+        )
+        .await;
 
         device
             .extend_peers(peers)

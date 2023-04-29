@@ -27,13 +27,7 @@ spec:
         env:
         - name: RUST_LOG
           value: info
-        - name: KEYS_CLIENT_URL
-          value: http://keys
-        - name: WG_IFACE_NAME
-          value: wg0
-        - name: WG_IFACE_PORT
-          value: "6969"
-        - name: WG_SERVER_PRIVKEY
+        - name: VPNAAS_WGDEVICE_PRIVATE_KEY
           valueFrom:
             secretKeyRef:
               name: wg

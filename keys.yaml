@@ -22,20 +22,12 @@ spec:
         env:
         - name: RUST_LOG
           value: info
-        - name: REDIS_HOSTNAME
-          value: redis
-        - name: REDIS_PORT
-          value: "6379"
-        - name: REDIS_USERNAME
-          value: keys
-        - name: REDIS_PASSWORD
+        - name: VPNAAS_REDIS_PASSWORD
           valueFrom:
             secretKeyRef:
               name: keys
               key: redis-pass
-        - name: WG_SERVER_URL
-          value: http://wg
-        - name: JWT_SECRET_KEY
+        - name: VPNAAS_JWT_SECRET_KEY
           valueFrom:
             secretKeyRef:
               name: mekstack

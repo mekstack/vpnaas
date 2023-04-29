@@ -2,24 +2,24 @@ use base64::{engine::general_purpose::STANDARD_NO_PAD as base64, Engine as _};
 use std::env;
 
 pub struct Config {
-    pub server_port: String,
-    pub private_key: [u8; 32],
-    pub keys_client_url: String,
-    pub iface_name: String,
-    pub iface_port: u16,
+    pub grpc_port: String,
+    pub grpc_keys_url: String,
+    pub wgdevice_interface_name: String,
+    pub wgdevice_interface_port: u16,
+    pub wgdevice_privkey: [u8; 32],
 }
 
 impl Config {
     pub fn from_env() -> Config {
         Config {
-            server_port: get_env_var_or_default("WG_SERVER_PORT", "80"),
-            keys_client_url: get_env_var("KEYS_CLIENT_URL"),
-            iface_name: get_env_var("WG_IFACE_NAME"),
-            iface_port: get_env_var("WG_IFACE_PORT")
+            grpc_port: get_env_var_or_default("VPNAAS_GRPC_PORT", "80"),
+            grpc_keys_url: get_env_var_or_default("VPNAAS_GRPC_KEYS_URL", "http://keys:80"),
+            wgdevice_interface_name: get_env_var_or_default("VPNAAS_WGDEVICE_NAME", "wg0"),
+            wgdevice_interface_port: get_env_var_or_default("VPNAAS_WGDEVICE_PORT", "51820")
                 .parse()
                 .expect("Invalid port number"),
-            private_key: base64
-                .decode(get_env_var("WG_SERVER_PRIVKEY"))
+            wgdevice_privkey: base64
+                .decode(get_env_var("VPNAAS_WGDEVICE_PRIVKEY"))
                 .expect("Private key decode failed")
                 .try_into()
                 .expect("Invalid private key length"),

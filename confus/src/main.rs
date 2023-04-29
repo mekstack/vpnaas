@@ -9,7 +9,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let config = config::Config::from_env();
-    let server_url = format!("0.0.0.0:{}", config.server_port).parse()?;
+    let server_url = format!("0.0.0.0:{}", config.grpc_port).parse()?;
     let confus_server = vpnaas::ConfusServer::new(confus::ConfusServer::from_config(config));
 
     log::info!("Starting confus server on {}", server_url);

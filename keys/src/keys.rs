@@ -42,7 +42,7 @@ return existing_username
 pub struct KeysServer {
     redis_connection_pool: r2d2::Pool<redis::Client>,
     jwt: jwt::JwtValidator,
-    wg_server_url: String,
+    grpc_wg_url: String,
 }
 
 impl KeysServer {
@@ -53,12 +53,12 @@ impl KeysServer {
             .max_size(15)
             .build(client)
             .unwrap();
-        let wg_server_url = config.wg_server_url;
+        let grpc_wg_client_url = config.grpc_wg_url;
 
         KeysServer {
             redis_connection_pool,
             jwt,
-            wg_server_url,
+            grpc_wg_url: grpc_wg_client_url,
         }
     }
 
@@ -99,7 +99,7 @@ impl KeysServer {
     async fn wg_server_client(
         &self,
     ) -> Result<vpnaas::WgClient<tonic::transport::Channel>, Status> {
-        let channel = tonic::transport::Channel::from_shared(self.wg_server_url.to_string())
+        let channel = tonic::transport::Channel::from_shared(self.grpc_wg_url.to_string())
             .map_err(|e| Status::unavailable(format!("Invalid wg uri: {}", e)))?
             .connect()
             .await

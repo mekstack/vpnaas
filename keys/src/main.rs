@@ -13,7 +13,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let config = config::Config::from_env();
     let jwt = jwt::JwtValidator::new(config.jwt_secret_key.clone());
 
-    let server_url = format!("0.0.0.0:{}", config.server_port).parse()?;
+    let server_url = format!("0.0.0.0:{}", config.grpc_port).parse()?;
     let keys_server = vpnaas::KeysServer::new(keys::KeysServer::new(config, jwt));
 
     log::info!("Starting keys server on {}", server_url);

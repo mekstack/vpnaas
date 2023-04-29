@@ -1,24 +1,25 @@
 use std::env;
 
 pub struct Config {
-    pub server_port: String,
+    pub grpc_port: String,
     pub redis_url: String,
     pub jwt_secret_key: String,
-    pub wg_server_url: String,
+    pub grpc_wg_url: String,
 }
 
 impl Config {
     pub fn from_env() -> Config {
         Config {
-            server_port: get_env_var_or_default("PORT", "80"),
-            jwt_secret_key: get_env_var("JWT_SECRET_KEY"),
-            wg_server_url: get_env_var("WG_SERVER_URL"),
+            grpc_port: get_env_var_or_default("VPNAAS_GRPC_PORT", "80"),
+            grpc_wg_url: get_env_var_or_default("VPNAAS_GRPC_WG_URL", "http://wg:80"),
+            jwt_secret_key: get_env_var("VPNAAS_JWT_SECRET_KEY"),
             redis_url: format!(
-                "redis://{}:{}@{}:{}",
-                get_env_var("REDIS_USERNAME"),
-                get_env_var("REDIS_PASSWORD"),
-                get_env_var("REDIS_HOSTNAME"),
-                get_env_var_or_default("REDIS_PORT", "6379")
+                "redis://{}:{}@{}:{}/{}",
+                get_env_var_or_default("VPNAAS_REDIS_USERNAME", "keys"),
+                get_env_var("VPNAAS_REDIS_PASSWORD"),
+                get_env_var_or_default("VPNAAS_REDIS_HOSTNAME", "redis"),
+                get_env_var_or_default("VPNAAS_REDIS_PORT", "6379"),
+                get_env_var_or_default("VPNAAS_REDIS_DATABASE", "0")
             ),
         }
     }
