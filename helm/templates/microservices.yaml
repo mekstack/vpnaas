@@ -1,0 +1,14 @@
+{{- range tuple "keys" "wg" "confus" "web" }}
+{{ include "vpnaas-lib.microservice" (
+        include "vpnaas.microservice-config"
+            (dict
+                "name" .
+                "Values" $.Values
+                "Chart" $.Chart
+                "Release" $.Release
+            )
+        | fromYaml
+    )
+}}
+---
+{{- end -}}

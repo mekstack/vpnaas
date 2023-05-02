@@ -1,0 +1,10 @@
+apiVersion: v2
+name: vpnaas
+description: A Blazingly Fast VPN as a Service
+type: application
+version: 0.1.0
+home: https://github.com/mekstack/vpnaas
+
+dependencies:
+- name: vpnaas-lib
+  version: 0.1.0

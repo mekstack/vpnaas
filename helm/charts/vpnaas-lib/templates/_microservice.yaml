@@ -1,0 +1,45 @@
+{{- define "vpnaas-lib.microservice" -}}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .name }}
+  labels:
+    {{- toYaml .labels | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- toYaml .selectorLabels | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- toYaml .selectorLabels | nindent 8 }}
+    spec:
+      securityContext:
+        {{- toYaml .securityContext | nindent 8 }}
+      containers:
+        - name: {{ .name }}
+          image: {{ printf "%s/%s:%s" .repository .name .tag }}
+          imagePullPolicy: {{ .pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ default 80 .port }}
+              protocol: TCP
+          env:
+            {{- toYaml .env | nindent 12 }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .name }}
+  labels:
+    {{- toYaml .labels | nindent 4 }}
+spec:
+  ports:
+    - port: {{ default 80 .port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- toYaml .selectorLabels | nindent 4 }}
+{{- end -}}

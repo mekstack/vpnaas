@@ -1,0 +1,5 @@
+apiVersion: v2
+name: vpnaas-lib
+description: A Helm library for VPNaaS
+type: library
+version: 0.1.0
