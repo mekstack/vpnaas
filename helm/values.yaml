@@ -42,7 +42,7 @@ microservices:
       valueFrom:
         secretKeyRef:
           name: wg
-          key: privkey
+          key: wgdevice-privkey
   confus:
     env:
     - name: RUST_LOG

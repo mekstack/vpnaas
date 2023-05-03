@@ -11,7 +11,7 @@ FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y wireguard-tools iproute2
 
-COPY --from=builder /app/wg/target/release/wg /usr/local/bin/wg
+COPY --from=builder /app/wg/target/release/wgrpc /usr/local/bin/wgrpc
 COPY --from=builder /app/wg/entrypoint.sh /entrypoint.sh
 
 ENTRYPOINT ["/entrypoint.sh"]

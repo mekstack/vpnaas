@@ -15,12 +15,12 @@ spec:
       labels:
         {{- toYaml .selectorLabels | nindent 8 }}
     spec:
-      securityContext:
-        {{- toYaml .securityContext | nindent 8 }}
       containers:
         - name: {{ .name }}
           image: {{ printf "%s/%s:%s" .repository .name .tag }}
           imagePullPolicy: {{ .pullPolicy }}
+          securityContext:
+            {{- toYaml .securityContext | nindent 12 }}
           ports:
             - name: http
               containerPort: {{ default 80 .port }}

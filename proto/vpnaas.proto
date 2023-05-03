@@ -2,13 +2,8 @@ syntax = "proto3";
 package vpnaas;
 
 service Keys {
-    // For wg_server
     rpc get_all_peers(Empty) returns (Peers);
-
-    // For config_server
     rpc get_peer(User) returns (Peer);
-
-    // For frontend
     rpc set_pubkey(UserPubkey) returns (Success);
 }
 
