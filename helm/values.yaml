@@ -61,17 +61,18 @@ redis:
   fullnameOverride: redis-keys
 
 ingress:
-  enabled: false
-  className: ""
-  annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
+  tls:
+  - secretName: tls
+    hosts:
+    - vpnaas.mekstack.ru
   hosts:
-    - host: chart-example.local
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
+  - host: vpnaas.mekstack.ru
+    paths:
+    - path: /
+      service: web
+    - path: /vpnaas.Confus
+      service: confus
+    - path: /vpnaas.Keys
+      service: keys
+    - path: /vpnaas.Wg
+      service: wg

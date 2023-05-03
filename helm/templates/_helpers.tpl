@@ -2,7 +2,7 @@
 Expand the name of the chart.
 */}}
 {{- define "vpnaas.name" -}}
-{{- printf "%s-%s" (default .Chart.Name .Values.nameOverride) .name | trunc 63 | trimSuffix "-" }}
+{{- printf "%s-%s" (default .Chart.Name .Values.nameOverride) (default "" .name) | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
