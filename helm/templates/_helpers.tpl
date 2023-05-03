@@ -35,7 +35,7 @@ Generates configuration for a microservice from a default
 {{- define "vpnaas.microservice-config" -}}
 {{- $defaults := deepCopy .Values.microservices._default -}}
 {{- $overrides := index .Values.microservices .name -}}
-{{- merge
+{{- mergeOverwrite
         $defaults
         $overrides
         (dict

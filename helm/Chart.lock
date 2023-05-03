@@ -1,0 +1,9 @@
+dependencies:
+- name: vpnaas-lib
+  repository: ""
+  version: 0.1.0
+- name: redis
+  repository: https://charts.bitnami.com/bitnami
+  version: 17.10.1
+digest: sha256:4b526257eb282365e79d23cc50e7aaa15fe49e2dc71ccaefc885729107699253
+generated: "2023-05-03T22:17:09.026754117+03:00"

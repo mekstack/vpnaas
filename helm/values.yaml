@@ -7,14 +7,18 @@ microservices:
     pullPolicy: Never
     tag: latest
     securityContext: {}
-    env:
-      - name: RUST_LOG
-        value: info
+    env: []
     labels: {}
     selectorLabels: {}
 
   keys:
     env:
+    - name: RUST_LOG
+      value: info
+    - name: VPNAAS_REDIS_USERNAME
+      value: default
+    - name: VPNAAS_REDIS_HOSTNAME
+      value: redis-keys-master
     - name: VPNAAS_REDIS_PASSWORD
       valueFrom:
         secretKeyRef:
@@ -32,13 +36,17 @@ microservices:
         - NET_ADMIN
         - SYS_MODULE
     env:
-    - name: VPNAAS_WGDEVICE_PRIVATE_KEY
+    - name: RUST_LOG
+      value: info
+    - name: VPNAAS_WGDEVICE_PRIVKEY
       valueFrom:
         secretKeyRef:
           name: wg
           key: privkey
   confus:
     env:
+    - name: RUST_LOG
+      value: info
     - name: VPNAAS_CONFIG_ENDPOINT
       value: wg.mekstack.ru
     - name: VPNAAS_CONFIG_PUBKEY
@@ -48,6 +56,9 @@ microservices:
     - name: VPNAAS_CONFIG_DNS
       value: 8.8.8.8
   web: {}
+
+redis:
+  fullnameOverride: redis-keys
 
 ingress:
   enabled: false

@@ -8,3 +8,6 @@ home: https://github.com/mekstack/vpnaas
 dependencies:
 - name: vpnaas-lib
   version: 0.1.0
+- name: redis
+  version: 17.10.1
+  repository: https://charts.bitnami.com/bitnami
