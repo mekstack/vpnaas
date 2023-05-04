@@ -8,7 +8,7 @@ home: https://github.com/mekstack/vpnaas
 dependencies:
 - name: saas-lib
   version: 9999
-  repository: https://mekstack.github.io/saas/helm/charts
+  repository: https://mekstack.github.io/saas/libcharts
 - name: redis
   version: 17.10.1
   repository: https://charts.bitnami.com/bitnami
