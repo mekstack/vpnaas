@@ -1,9 +1,9 @@
 dependencies:
-- name: vpnaas-lib
-  repository: ""
+- name: saas-lib
+  repository: https://mekstack.github.io/saas/helm/charts
   version: 0.1.0
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 17.10.1
-digest: sha256:4b526257eb282365e79d23cc50e7aaa15fe49e2dc71ccaefc885729107699253
-generated: "2023-05-03T22:17:09.026754117+03:00"
+digest: sha256:b76eef7724bc6a2055a3ba5555247e5c8c53d83e2c60d6d68b63a88c46190eff
+generated: "2023-05-04T15:18:12.311847868+03:00"
