@@ -1,13 +1,13 @@
-FROM rust as builder
+FROM rust:1-alpine as builder
 
-RUN apt-get update && apt-get install -y protobuf-compiler
+RUN apk add --no-cache musl-dev build-base protobuf-dev
 
 WORKDIR /app
 COPY keys keys
 COPY proto proto
 RUN cargo build --release --manifest-path=keys/Cargo.toml
 
-FROM debian:bookworm-slim
+FROM alpine
 
 COPY --from=builder /app/keys/target/release/keys /usr/local/bin/keys
 
