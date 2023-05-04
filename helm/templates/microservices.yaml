@@ -3,9 +3,7 @@
         include "vpnaas.microservice-config"
             (dict
                 "name" .
-                "Values" $.Values
-                "Chart" $.Chart
-                "Release" $.Release
+                "context" $
             )
         | fromYaml
     )

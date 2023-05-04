@@ -33,15 +33,16 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Generates configuration for a microservice from a default
 */}}
 {{- define "vpnaas.microservice-config" -}}
-{{- $defaults := deepCopy .Values.microservices._default -}}
-{{- $overrides := index .Values.microservices .name -}}
+{{- $defaults := deepCopy .context.Values.microservices._default -}}
+{{- $overrides := index .context.Values.microservices .name -}}
+{{- $contextWithName := mergeOverwrite .context (dict "name" .name) -}}
 {{- mergeOverwrite
         $defaults
         $overrides
         (dict
             "name" .name
-            "labels" (include "vpnaas.labels" . | fromYaml)
-            "selectorLabels" (include "vpnaas.selectorLabels" . | fromYaml)
+            "labels" (include "vpnaas.labels" $contextWithName | fromYaml)
+            "selectorLabels" (include "vpnaas.selectorLabels" $contextWithName | fromYaml)
         )
     | toYaml
 -}}
