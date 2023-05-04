@@ -1,9 +1,9 @@
 dependencies:
 - name: saas-lib
   repository: https://mekstack.github.io/saas/helm/charts
-  version: 0.1.0
+  version: "9999"
 - name: redis
   repository: https://charts.bitnami.com/bitnami
   version: 17.10.1
-digest: sha256:b76eef7724bc6a2055a3ba5555247e5c8c53d83e2c60d6d68b63a88c46190eff
-generated: "2023-05-04T15:18:12.311847868+03:00"
+digest: sha256:3adf068aff85dead83fb753cbdcfcb6c353cbf5413d1d01a4c9b04012d8a826a
+generated: "2023-05-04T15:59:35.40615181+03:00"

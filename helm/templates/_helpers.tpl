@@ -28,22 +28,3 @@ Selector labels
 app.kubernetes.io/name: {{ include "vpnaas.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
-
-{{/*
-Generates configuration for a microservice from a default
-*/}}
-{{- define "vpnaas.microservice-config" -}}
-{{- $defaults := deepCopy .context.Values.microservices._default -}}
-{{- $overrides := index .context.Values.microservices .name -}}
-{{- $contextWithName := mergeOverwrite .context (dict "name" .name) -}}
-{{- mergeOverwrite
-        $defaults
-        $overrides
-        (dict
-            "name" .name
-            "labels" (include "vpnaas.labels" $contextWithName | fromYaml)
-            "selectorLabels" (include "vpnaas.selectorLabels" $contextWithName | fromYaml)
-        )
-    | toYaml
--}}
-{{- end }}
