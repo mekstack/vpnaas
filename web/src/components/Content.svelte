@@ -2,6 +2,7 @@
     import userStore from "../stores/userStore";
     import { renderWireguardConfig, logError, base64ToBytes } from "../utils";
     import * as grpc from "../services/grpc";
+    import * as grpcWeb from "grpc-web";
 
     import { UserConfig, Pubkey } from "../grpc/vpnaas_pb";
 
@@ -18,7 +19,7 @@
     );
 
     let userConfig: UserConfig;
-    let userPubkeyBase64: string;
+    let userPubkeyBase64: string = "";
     let isPubkeySet = false;
     let setPubkeyButtonText: string;
     let pubkeyBoxLabel: string;
@@ -32,7 +33,12 @@
                 userConfig.getUserPeer().getPubkey()?.getBytes_asB64() || "";
             isPubkeySet = true;
         } catch (err) {
-            logError(err);
+            if (err.code === grpcWeb.StatusCode.NOT_FOUND) { // user has no config yet
+                userPubkeyBase64 = "";
+                isPubkeySet = false;
+            } else {
+                logError(err);
+            }
         }
     }
 
