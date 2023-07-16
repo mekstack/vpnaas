@@ -45,7 +45,7 @@
     async function setPubkey() {
         try {
             const pubkey = new Pubkey().setBytes(
-                base64ToBytes(userPubkeyBase64)
+                base64ToBytes(userPubkeyBase64.replace(/=+$/, ''))
             );
             await grpc.setPubkey(username, accessToken, pubkey);
             getConfig();
