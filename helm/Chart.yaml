@@ -9,6 +9,8 @@ dependencies:
 - name: saas-lib
   version: 9999
   repository: https://mekstack.github.io/saas/libcharts
+  condition: saas-lib.enabled
 - name: redis
   version: 17.10.1
   repository: https://charts.bitnami.com/bitnami
+  condition: redis.enabled
