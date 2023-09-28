@@ -43,7 +43,8 @@
 <div class="container">
     <div class="header">
         <h1>VPNaaS</h1>
-        <a href="https://github.com/mekstack/vpnaas" class="link">github</a>
+        <a href="https://mekstack.ru" class="link">console</a>
+        <a href="https://github.com/mekstack/vpnaas" class="link">star me</a>
         <a href="https://docs.mekstack.ru" class="link">docs</a>
     </div>
 
