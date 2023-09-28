@@ -6,32 +6,17 @@ function int2ip(num: number): string {
 }
 
 export function renderWireguardConfig(config: UserConfig) {
-    const userPeer = config.getUserPeer();
-    const serverPeer = config.getServerPeer();
-    const ip = int2ip(userPeer.getIp());
-    const dns = config.getDns();
-    const pubkey = serverPeer.getPubkey()?.getBytes_asB64() || "";
-    const allowedIps = serverPeer.getAllowedIpsList().join(", ");
-    const endpoint = serverPeer.getEndpoint();
-
-    const data = {
-        ip,
-        dns,
-        pubkey,
-        allowedIps,
-        endpoint,
-    };
+    const interfaceConfigBlock = config.getInterfaceConfigList().join("\n");
+    const peerConfigBlock = config.getPeerConfigList().join("\n");
+    const ip = int2ip(config.getUser()?.getIp() || 0);
 
     return `
 [Interface]
-Address = ${data.ip}
-PrivateKey = YOUR_PRIVATE_KEY
-DNS = ${data.dns}
+Address = ${ip}
+${interfaceConfigBlock}
 
 [Peer]
-PublicKey = ${data.pubkey}
-AllowedIPs = ${data.allowedIps}
-Endpoint = ${data.endpoint}
+${peerConfigBlock}
 `.trim();
 }
 

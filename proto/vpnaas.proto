@@ -46,14 +46,15 @@ message Peers {
     repeated Peer peers = 1;
 }
 
-message UserConfig {
-    message ServerPeer {
-        Pubkey pubkey = 1;
-        string endpoint = 2;
-        repeated string allowed_ips = 3;
-    }
+message ServerPeer {
+    Pubkey pubkey = 1;
+    string endpoint = 2;
+    repeated string allowed_ips = 3;
+}
 
-    Peer user_peer = 1;
-    ServerPeer server_peer = 2; // hardcoded
-    string dns = 3; // hardcoded
+message UserConfig {
+    Peer user = 1;
+
+    repeated string interface_config = 4;
+    repeated string peer_config = 5;
 }

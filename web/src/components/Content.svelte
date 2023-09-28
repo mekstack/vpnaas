@@ -30,7 +30,7 @@
         try {
             userConfig = await grpc.getConfig(username);
             userPubkeyBase64 =
-                userConfig.getUserPeer().getPubkey()?.getBytes_asB64() || "";
+                userConfig.getUser()?.getPubkey()?.getBytes_asB64() || "";
             isPubkeySet = true;
         } catch (err) {
             if (err.code === grpcWeb.StatusCode.NOT_FOUND) { // user has no config yet

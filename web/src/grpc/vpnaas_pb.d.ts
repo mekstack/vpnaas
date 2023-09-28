@@ -138,19 +138,51 @@ export namespace Peers {
   }
 }
 
+export class ServerPeer extends jspb.Message {
+  getPubkey(): Pubkey | undefined;
+  setPubkey(value?: Pubkey): ServerPeer;
+  hasPubkey(): boolean;
+  clearPubkey(): ServerPeer;
+
+  getEndpoint(): string;
+  setEndpoint(value: string): ServerPeer;
+
+  getAllowedIpsList(): Array<string>;
+  setAllowedIpsList(value: Array<string>): ServerPeer;
+  clearAllowedIpsList(): ServerPeer;
+  addAllowedIps(value: string, index?: number): ServerPeer;
+
+  serializeBinary(): Uint8Array;
+  toObject(includeInstance?: boolean): ServerPeer.AsObject;
+  static toObject(includeInstance: boolean, msg: ServerPeer): ServerPeer.AsObject;
+  static serializeBinaryToWriter(message: ServerPeer, writer: jspb.BinaryWriter): void;
+  static deserializeBinary(bytes: Uint8Array): ServerPeer;
+  static deserializeBinaryFromReader(message: ServerPeer, reader: jspb.BinaryReader): ServerPeer;
+}
+
+export namespace ServerPeer {
+  export type AsObject = {
+    pubkey?: Pubkey.AsObject,
+    endpoint: string,
+    allowedIpsList: Array<string>,
+  }
+}
+
 export class UserConfig extends jspb.Message {
-  getUserPeer(): Peer | undefined;
-  setUserPeer(value?: Peer): UserConfig;
-  hasUserPeer(): boolean;
-  clearUserPeer(): UserConfig;
+  getUser(): Peer | undefined;
+  setUser(value?: Peer): UserConfig;
+  hasUser(): boolean;
+  clearUser(): UserConfig;
 
-  getServerPeer(): UserConfig.ServerPeer | undefined;
-  setServerPeer(value?: UserConfig.ServerPeer): UserConfig;
-  hasServerPeer(): boolean;
-  clearServerPeer(): UserConfig;
+  getInterfaceConfigList(): Array<string>;
+  setInterfaceConfigList(value: Array<string>): UserConfig;
+  clearInterfaceConfigList(): UserConfig;
+  addInterfaceConfig(value: string, index?: number): UserConfig;
 
-  getDns(): string;
-  setDns(value: string): UserConfig;
+  getPeerConfigList(): Array<string>;
+  setPeerConfigList(value: Array<string>): UserConfig;
+  clearPeerConfigList(): UserConfig;
+  addPeerConfig(value: string, index?: number): UserConfig;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): UserConfig.AsObject;
@@ -162,40 +194,9 @@ export class UserConfig extends jspb.Message {
 
 export namespace UserConfig {
   export type AsObject = {
-    userPeer?: Peer.AsObject,
-    serverPeer?: UserConfig.ServerPeer.AsObject,
-    dns: string,
+    user?: Peer.AsObject,
+    interfaceConfigList: Array<string>,
+    peerConfigList: Array<string>,
   }
-
-  export class ServerPeer extends jspb.Message {
-    getPubkey(): Pubkey | undefined;
-    setPubkey(value?: Pubkey): ServerPeer;
-    hasPubkey(): boolean;
-    clearPubkey(): ServerPeer;
-
-    getEndpoint(): string;
-    setEndpoint(value: string): ServerPeer;
-
-    getAllowedIpsList(): Array<string>;
-    setAllowedIpsList(value: Array<string>): ServerPeer;
-    clearAllowedIpsList(): ServerPeer;
-    addAllowedIps(value: string, index?: number): ServerPeer;
-
-    serializeBinary(): Uint8Array;
-    toObject(includeInstance?: boolean): ServerPeer.AsObject;
-    static toObject(includeInstance: boolean, msg: ServerPeer): ServerPeer.AsObject;
-    static serializeBinaryToWriter(message: ServerPeer, writer: jspb.BinaryWriter): void;
-    static deserializeBinary(bytes: Uint8Array): ServerPeer;
-    static deserializeBinaryFromReader(message: ServerPeer, reader: jspb.BinaryReader): ServerPeer;
-  }
-
-  export namespace ServerPeer {
-    export type AsObject = {
-      pubkey?: Pubkey.AsObject,
-      endpoint: string,
-      allowedIpsList: Array<string>,
-    }
-  }
-
 }
 

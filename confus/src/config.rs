@@ -2,24 +2,23 @@ use std::env;
 
 pub struct Config {
     pub grpc_port: String,
-    pub config_endpoint: String,
-    pub config_pubkey: String,
-    pub config_allowed_ips: Vec<String>,
-    pub gprc_keys_url: String,
-    pub config_dns: String,
+    pub grpc_keys_url: String,
+    pub interface_config: Vec<String>,
+    pub peer_config: Vec<String>,
 }
 
 impl Config {
     pub fn from_env() -> Config {
         Config {
             grpc_port: get_env_var_or_default("VPNAAS_GRPC_PORT", "80"),
-            gprc_keys_url: get_env_var_or_default("VPNAAS_GRPC_KEYS_URL", "http://keys:80"),
-            config_endpoint: get_env_var("VPNAAS_CONFIG_ENDPOINT"),
-            config_pubkey: get_env_var("VPNAAS_CONFIG_PUBKEY"),
-            config_dns: get_env_var("VPNAAS_CONFIG_DNS"),
-            config_allowed_ips: get_env_var("VPNAAS_CONFIG_ALLOWED_IPS")
-                .split_whitespace()
-                .map(|s| s.to_owned())
+            grpc_keys_url: get_env_var_or_default("VPNAAS_GRPC_KEYS_URL", "http://keys:80"),
+            interface_config: get_env_var("VPNAAS_INTERFACE_CONFIG")
+                .lines()
+                .map(|s| s.trim().to_string())
+                .collect(),
+            peer_config: get_env_var("VPNAAS_PEER_CONFIG")
+                .lines()
+                .map(|s| s.trim().to_string())
                 .collect(),
         }
     }
