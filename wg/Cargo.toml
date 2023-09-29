@@ -4,21 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-base64 = "0.21.0"
+base64 = "0.21.4"
 env_logger = "0.10.0"
 failure = "0.1.8"
 futures = "0.3.28"
-genetlink = "0.2.4"
-log = "0.4.17"
-netlink-packet-core = "0.5.0"
-netlink-packet-generic = "0.3.2"
-netlink-packet-wireguard = "0.2.1"
-prost = "0.11.8"
-tokio = { version = "1.27.0", features = ["rt-multi-thread", "macros", "sync", "time"] }
-tonic = "0.9.1"
+genetlink = "0.2.5"
+log = "0.4.20"
+netlink-packet-core = "0.7.0"
+netlink-packet-generic = "0.3.3"
+netlink-packet-wireguard = "0.2.3"
+prost = "0.12.1"
+tokio = { version = "1.32.0", features = ["rt-multi-thread", "macros", "sync", "time"] }
+tonic = "0.10.2"
 
 [build-dependencies]
-tonic-build = "0.9.1"
+tonic-build = "0.10.2"
 
 [profile.release]
 codegen-units = 1
