@@ -1,30 +1,16 @@
-apiVersion: networking.k8s.io/v1
-kind: Ingress
+apiVersion: v1
+kind: Service
 metadata:
-  name: {{ include "vpnaas.name" . }}
+  name: wg-wireguard-lb
   labels:
     {{- include "vpnaas.labels" . | nindent 4 }}
 spec:
-  tls:
-    {{- range .Values.ingress.tls }}
-    - hosts:
-      {{- range .hosts }}
-      - {{ . | quote }}
-      {{- end }}
-      secretName: {{ .secretName }}
-    {{- end }}
-  rules:
-    {{- range .Values.ingress.hosts }}
-    - host: {{ .host | quote }}
-      http:
-        paths:
-        {{- range .paths }}
-        - path: {{ .path }}
-          pathType: Prefix
-          backend:
-            service:
-              name: {{ .service }}
-              port:
-                number: 80
-        {{- end }}
-    {{- end }}
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/instance: vpnaas
+    app.kubernetes.io/name: vpnaas-wg
+  ports:
+  - port: 51820
+    targetPort: 51820
+    protocol: UDP
+  loadBalancerIP: 172.18.218.100

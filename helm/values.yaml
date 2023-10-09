@@ -1,16 +1,14 @@
 nameOverride: ""
 
-microservices:
-  _default:
-    name: ""
-    repository: mekstack/vpnaas
-    pullPolicy: Never
-    tag: latest
-    securityContext: {}
-    env: []
-    labels: {}
-    selectorLabels: {}
+microservicesCommon:
+  repository: ghcr.io/mekstack/vpnaas
+  pullPolicy: Always
+  tag: latest
+  containerPorts:
+  - containerPort: 80
+    protocol: TCP
 
+microservices:
   keys:
     env:
     - name: RUST_LOG
@@ -30,11 +28,20 @@ microservices:
           name: mekstack
           key: jwt-secret-key
   wg:
-    securityContext:
+    podSecurityContext:
+      sysctls:
+      - name: net.ipv4.ip_forward
+        value: "1"
+    containerSecurityContext:
       capabilities:
         add:
         - NET_ADMIN
         - SYS_MODULE
+    containerPorts:
+      - containerPort: 80
+        protocol: TCP
+      - containerPort: 51820
+        protocol: UDP
     env:
     - name: RUST_LOG
       value: info
@@ -47,32 +54,19 @@ microservices:
     env:
     - name: RUST_LOG
       value: info
-    - name: VPNAAS_CONFIG_ENDPOINT
-      value: wg.mekstack.ru
-    - name: VPNAAS_CONFIG_PUBKEY
-      value: mZjqLnMXtQUpPLu1ntq2PgrG75HDarhvywvmT7M9gQo
-    - name: VPNAAS_CONFIG_ALLOWED_IPS
-      value: 0.0.0.0/0
-    - name: VPNAAS_CONFIG_DNS
-      value: 8.8.8.8
+    - name: VPNAAS_INTERFACE_CONFIG
+      value: |
+        PrivateKey = YOUR_PRIVATE_KEY
+        DNS = 172.18.218.200
+        MTU = 1376
+    - name: VPNAAS_PEER_CONFIG
+      value: |
+        PublicKey  = bjF96fpIhZcIuAqFxiJoP8kTAjy4A0Lba/bBA6d2HF8=
+        Endpoint   = wg.mekstack.ru:51820
+        AllowedIPs = 172.18.218.0/23
   web: {}
 
 redis:
   fullnameOverride: redis-keys
-
-ingress:
-  tls:
-  - secretName: tls
-    hosts:
-    - vpnaas.mekstack.ru
-  hosts:
-  - host: vpnaas.mekstack.ru
-    paths:
-    - path: /
-      service: web
-    - path: /vpnaas.Confus
-      service: confus
-    - path: /vpnaas.Keys
-      service: keys
-    - path: /vpnaas.Wg
-      service: wg
+  global:
+    storageClass: cinder

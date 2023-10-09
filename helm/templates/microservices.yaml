@@ -1,15 +1,6 @@
-{{- range tuple "keys" "wg" "confus" "web" }}
-{{- $_ := mergeOverwrite $ (dict "name" .) -}}
-{{ include "saas-lib.microservice" (
-        include "saas-lib.microservice-config"
-            (dict
-                "context" $
-                "name" .
-                "labels" (include "vpnaas.labels" $ | fromYaml)
-                "selectorLabels" (include "vpnaas.selectorLabels" $ | fromYaml)
-            )
-        | fromYaml
-    )
-}}
+{{- range $name, $microserviceValues := .Values.microservices }}
 ---
-{{- end -}}
+{{- $microserviceValues := merge $.Values.microservicesCommon $microserviceValues }}
+{{- $finalValues := merge (dict "name" $name) $microserviceValues }}
+{{- include "common.microservice" (dict "Values" $finalValues "Chart" $.Chart "Release" $.Release) }}
+{{- end }}

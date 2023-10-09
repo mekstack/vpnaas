@@ -2,15 +2,14 @@ apiVersion: v2
 name: vpnaas
 description: A Blazingly Fast VPN as a Service
 type: application
-version: 9999
+version: "9999"
 home: https://github.com/mekstack/vpnaas
 
 dependencies:
-- name: saas-lib
-  version: 9999
-  repository: https://mekstack.github.io/saas/libcharts
-  condition: saas-lib.enabled
+- name: common
+  version: "9999"
+  repository: "file://charts"
 - name: redis
-  version: 17.10.1
+  version: "18.1.3"
   repository: https://charts.bitnami.com/bitnami
   condition: redis.enabled

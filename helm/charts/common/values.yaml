@@ -1,0 +1,11 @@
+name: ""
+
+replicaCount: 0
+repository: ""
+tag: ""
+pullPolicy: ""
+
+podSecurityContext: {}
+containerSecurityContext: {}
+containerPorts: []
+env: []
