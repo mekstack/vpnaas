@@ -3,6 +3,7 @@ mod jwt;
 mod keys;
 mod tests;
 mod vpnaas;
+mod jwt_claims;
 
 use tonic::transport::Server;
 
@@ -11,7 +12,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let config = config::Config::from_env();
-    let jwt = jwt::JwtValidator::new(config.jwt_secret_key.clone());
+
+    let jwt = jwt::JwtValidator::new(config.jwks_url.clone()).await?;
 
     let server_url = format!("0.0.0.0:{}", config.grpc_port).parse()?;
     let keys_server = vpnaas::KeysServer::new(keys::KeysServer::new(config, jwt));

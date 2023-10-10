@@ -6,7 +6,7 @@
     import userStore, { setUsername, setAccessToken } from "./stores/userStore";
 
     import {
-        checkForAccessTokenInHash,
+        getAccessTokenAfterSignin,
         getUsernameFromAccessToken,
         getAccessTokenFromLocalStorage,
         login,
@@ -22,11 +22,11 @@
         accessToken = $userStore.accessToken;
     });
 
-    onMount(() => {
-        const accessTokenFromHash = checkForAccessTokenInHash();
-        const accessTokenFromLocalStorage = getAccessTokenFromLocalStorage();
+    onMount(async () => {
+        const newAccessToken = await getAccessTokenAfterSignin();
+        const localAccessToken = getAccessTokenFromLocalStorage();
 
-        const accessToken = accessTokenFromHash || accessTokenFromLocalStorage;
+        const accessToken = newAccessToken || localAccessToken;
         if (accessToken) {
             setAccessToken(accessToken);
             setUsername(getUsernameFromAccessToken(accessToken));

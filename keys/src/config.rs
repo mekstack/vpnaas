@@ -3,7 +3,7 @@ use std::env;
 pub struct Config {
     pub grpc_port: String,
     pub redis_url: String,
-    pub jwt_secret_key: String,
+    pub jwks_url: String,
     pub grpc_wg_url: String,
 }
 
@@ -12,7 +12,7 @@ impl Config {
         Config {
             grpc_port: get_env_var_or_default("VPNAAS_GRPC_PORT", "80"),
             grpc_wg_url: get_env_var_or_default("VPNAAS_GRPC_WG_URL", "http://wg:80"),
-            jwt_secret_key: get_env_var("VPNAAS_JWT_SECRET_KEY"),
+            jwks_url: get_env_var("VPNAAS_JWKS_URL"),
             redis_url: format!(
                 "redis://{}:{}@{}:{}/{}",
                 get_env_var_or_default("VPNAAS_REDIS_USERNAME", "keys"),

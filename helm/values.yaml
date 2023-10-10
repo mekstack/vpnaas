@@ -22,11 +22,8 @@ microservices:
         secretKeyRef:
           name: keys
           key: redis-pass
-    - name: VPNAAS_JWT_SECRET_KEY
-      valueFrom:
-        secretKeyRef:
-          name: mekstack
-          key: jwt-secret-key
+    - name: VPNAAS_JWKS_URL
+      value: "https://vault.mekstack.ru/v1/identity/oidc/provider/hse/.well-known/keys"
   wg:
     podSecurityContext:
       sysctls:

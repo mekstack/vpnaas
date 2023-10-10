@@ -1,6 +1,7 @@
 FROM rust:1-alpine as builder
 
-RUN apk add --no-cache musl-dev build-base protobuf-dev
+RUN apk add --no-cache musl-dev build-base protobuf-dev openssl-dev pkgconfig
+ENV OPENSSL_DIR=/usr
 
 WORKDIR /app
 COPY keys keys

@@ -6,15 +6,18 @@ edition = "2021"
 [dependencies]
 redis = { version = "0.23.3", features = ["aio", "tokio-comp", "r2d2", "connection-manager"] }
 tokio = { version = "1.32.0", features = ["rt-multi-thread", "macros", "sync", "time"] }
-prost = "0.12.1"
 tonic = "0.10.2"
 r2d2 = "0.8.10"
 base64 = "0.21.4"
-jsonwebtoken = "8.3.0"
 serde = "1.0.188"
 tonic-web = "0.10.2"
 env_logger = "0.10.0"
 log = "0.4.20"
+reqwest = "0.11.22"
+aliri = "0.6.2"
+aliri_oauth2 = { version = "0.10.0", features = ["reqwest", "tokio"] }
+aliri_clock = "0.1.4"
+prost = "0.12.1"
 
 [build-dependencies]
 tonic-build = "0.10.2"
