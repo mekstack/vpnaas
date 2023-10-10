@@ -20,7 +20,7 @@ microservices:
     - name: VPNAAS_REDIS_PASSWORD
       valueFrom:
         secretKeyRef:
-          name: keys
+          name: redis
           key: redis-pass
     - name: VPNAAS_JWKS_URL
       value: "https://vault.mekstack.ru/v1/identity/oidc/provider/hse/.well-known/keys"
@@ -67,3 +67,6 @@ redis:
   fullnameOverride: redis-keys
   global:
     storageClass: cinder
+  auth:
+    existingSecret: redis
+    existingSecretPasswordKey: redis-pass
