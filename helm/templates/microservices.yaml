@@ -1,6 +1,6 @@
 {{- range $name, $microserviceValues := .Values.microservices }}
 ---
-{{- $microserviceValues := merge $.Values.microservicesCommon $microserviceValues }}
+{{- $microserviceValues := deepCopy $.Values.microservicesCommon | merge $microserviceValues }}
 {{- $finalValues := merge (dict "name" $name) $microserviceValues }}
 {{- include "common.microservice" (dict "Values" $finalValues "Chart" $.Chart "Release" $.Release) }}
 {{- end }}
