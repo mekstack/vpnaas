@@ -16,7 +16,7 @@ spec:
         {{- include "common.selectorLabels" . | nindent 8 }}
     spec:
       securityContext:
-        {{- toYaml .podSecurityContext | nindent 12 }}
+        {{- toYaml .Values.podSecurityContext | nindent 12 }}
       containers:
         - name: {{ .Values.name }}
           image: {{ printf "%s/%s:%s" .Values.repository .Values.name .Values.tag | quote }}
