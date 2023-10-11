@@ -2,7 +2,7 @@ apiVersion: v2
 name: vpnaas
 description: A Blazingly Fast VPN as a Service
 type: application
-version: "10000"
+version: "9999"
 home: https://github.com/mekstack/vpnaas
 
 dependencies:

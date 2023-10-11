@@ -34,7 +34,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Values.name }}-http
+  name: {{ .Values.name }}
   labels:
     {{- include "common.labels" . | nindent 4 }}
 spec:
