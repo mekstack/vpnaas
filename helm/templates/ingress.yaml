@@ -7,8 +7,8 @@ metadata:
 spec:
   type: LoadBalancer
   selector:
-    app.kubernetes.io/instance: vpnaas
-    app.kubernetes.io/name: vpnaas-wg
+    app.kubernetes.io/instance: vpnaas-helm
+    app.kubernetes.io/name: wg
   ports:
   - port: 51820
     targetPort: 51820
