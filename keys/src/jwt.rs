@@ -32,7 +32,7 @@ impl JwtValidator {
 
         let claims: Claims = self
             .authority
-            .verify_token(&token, &oauth::ScopePolicy::default())
+            .verify_token(token, &oauth::ScopePolicy::default())
             .map_err(|e| Status::unauthenticated(format!("Token verification failed: {}", e)))?;
 
         if request_username == claims.username {

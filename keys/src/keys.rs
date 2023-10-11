@@ -47,12 +47,14 @@ pub struct KeysServer {
 
 impl KeysServer {
     pub fn new(config: config::Config, jwt: jwt::JwtValidator) -> KeysServer {
-        let client = redis::Client::open(config.redis_url).unwrap();
+        let client = redis::Client::open(config.redis_url)
+            .unwrap_or_else(|e| panic!("Failed to connect to Redis: {}", e));
+
         let redis_connection_pool = r2d2::Pool::builder()
             .connection_timeout(Duration::from_secs(1))
             .max_size(15)
             .build(client)
-            .unwrap();
+            .unwrap_or_else(|e| panic!("Failed to build Redis connection pool: {}", e));
         let grpc_wg_client_url = config.grpc_wg_url;
 
         KeysServer {
@@ -71,7 +73,7 @@ impl KeysServer {
     fn getset_ip(&self, username: &String) -> Result<u32, Status> {
         let mut c = self.redis()?;
 
-        redis::Script::new(&GETSET_IP_SCRIPT)
+        redis::Script::new(GETSET_IP_SCRIPT)
             .arg(username)
             .invoke::<Option<u32>>(&mut c)
             .map_err(|e| Status::from_error(e.into()))?
@@ -81,7 +83,7 @@ impl KeysServer {
     fn set_pubkey_nx(&self, pubkey: &[u8; 32], username: &String, ip: u32) -> Result<(), Status> {
         let mut c = self.redis()?;
 
-        let existing_username = redis::Script::new(&SET_PUBKEY_NX_SCRIPT)
+        let existing_username = redis::Script::new(SET_PUBKEY_NX_SCRIPT)
             .arg(pubkey)
             .arg(username)
             .arg(ip)
@@ -156,7 +158,7 @@ impl vpnaas::proto::keys_server::Keys for KeysServer {
         }))
     }
 
-    async fn get_all_peers(&self, request: Request<Empty>) -> Result<Response<Peers>, Status> {
+    async fn get_all_peers(&self, _request: Request<Empty>) -> Result<Response<Peers>, Status> {
         let peers: Vec<Peer> = self
             .redis()?
             .hgetall::<_, Vec<(u32, Vec<u8>)>>("ip:to:pubkey")
