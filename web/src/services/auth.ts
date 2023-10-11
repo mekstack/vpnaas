@@ -28,7 +28,6 @@ export async function getAccessTokenAfterSignin(): Promise<string | undefined> {
             const user = await userManager.signinRedirectCallback();
             const accessToken = user.id_token;
             if (accessToken) {
-                console.log(accessToken);
                 localStorage.setItem('accessToken', accessToken);
             }
             return accessToken;
@@ -49,6 +48,19 @@ export function getAccessTokenFromLocalStorage(): string | null {
 
 export function getUsernameFromAccessToken(accessToken: string): string {
     return jwtDecode<VPNaaSToken>(accessToken).username;
+}
+
+export function isTokenExpired(accessToken: string): boolean {
+    const decodedToken = jwtDecode<VPNaaSToken>(accessToken);
+    const currentTimestamp = Math.floor(Date.now() / 1000);
+    return decodedToken.exp <= currentTimestamp;
+}
+
+export function checkTokenExpiry(): void {
+    const accessToken = localStorage.getItem('accessToken');
+    if (accessToken && isTokenExpired(accessToken)) {
+        localStorage.removeItem('accessToken');
+    }
 }
 
 export function login(): void {

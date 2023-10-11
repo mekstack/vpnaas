@@ -9,6 +9,7 @@
         getAccessTokenAfterSignin,
         getUsernameFromAccessToken,
         getAccessTokenFromLocalStorage,
+        checkTokenExpiry,
         login,
     } from "./services/auth";
 
@@ -23,6 +24,8 @@
     });
 
     onMount(async () => {
+        checkTokenExpiry();
+
         const newAccessToken = await getAccessTokenAfterSignin();
         const localAccessToken = getAccessTokenFromLocalStorage();
 
