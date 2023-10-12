@@ -33,7 +33,8 @@
                 userConfig.getUser()?.getPubkey()?.getBytes_asB64() || "";
             isPubkeySet = true;
         } catch (err) {
-            if (err.code === grpcWeb.StatusCode.NOT_FOUND) { // user has no config yet
+            if (err.code === grpcWeb.StatusCode.NOT_FOUND) {
+                // user has no config yet
                 userPubkeyBase64 = "";
                 isPubkeySet = false;
             } else {
@@ -45,12 +46,21 @@
     async function setPubkey() {
         try {
             const pubkey = new Pubkey().setBytes(
-                base64ToBytes(userPubkeyBase64.replace(/=+$/, ''))
+                base64ToBytes(userPubkeyBase64.replace(/=+$/, ""))
             );
             await grpc.setPubkey(username, accessToken, pubkey);
             getConfig();
         } catch (err) {
             logError(err);
+
+            if (err.code === grpcWeb.StatusCode.UNAUTHENTICATED) {
+                const logoutMsg = new Error(`Logging out...`);
+                logError(logoutMsg);
+
+                userStore.update((store) => {
+                    return { ...store, accessToken: null };
+                });
+            }
         }
     }
 
