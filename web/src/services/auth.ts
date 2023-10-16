@@ -9,7 +9,7 @@ const userManager = new UserManager({
         token_endpoint: 'https://vault.mekstack.ru/v1/identity/oidc/provider/hse/token',
         authorization_endpoint: 'https://vault.mekstack.ru/ui/vault/identity/oidc/provider/hse/authorize'
     },
-    client_id: 'OH6r6tUSHseRZecMVxHLcjrlBh2IyNqa',
+    client_id: 'tkHN6d3M4msmv5UszRqQGfMQLUfZpL68',
     redirect_uri: window.location.origin,
     response_type: 'code',
     scope: 'openid user',
