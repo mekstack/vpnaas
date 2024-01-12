@@ -70,3 +70,6 @@ redis:
   auth:
     existingSecret: redis
     existingSecretPasswordKey: redis-pass
+  master:
+    persistence:
+      existingClaim: "redis-data-redis-keys-master-0"
